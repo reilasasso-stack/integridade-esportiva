@@ -3,373 +3,609 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Administrativo | Integridade Esportiva</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Painel Admin | Integridade Esportiva</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --navy: #0D1B2A; --navy2: #132337; --navy3: #1a2f45;
-    --green: #2D6A4F; --green-light: #40916C; --green-accent: #74C69D;
-    --red: #e74c3c; --yellow: #f39c12; --blue: #3498db;
-    --white: #FAFAF8; --text-muted: rgba(255,255,255,0.5);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'DM Sans',sans-serif; background:var(--navy); color:white; min-height:100vh; }
-
-  /* LOGIN */
-  #loginScreen {
-    min-height:100vh; display:flex; align-items:center; justify-content:center;
-    background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(45,106,79,0.15) 0%, transparent 70%);
-  }
-  .login-box {
-    background:var(--navy2); border:1px solid rgba(116,198,157,0.2);
-    border-radius:20px; padding:3rem; width:100%; max-width:400px; text-align:center;
-  }
-  .login-box .icon { font-size:3rem; margin-bottom:1rem; }
-  .login-box h2 { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:0.5rem; }
-  .login-box p { color:var(--text-muted); font-size:0.9rem; margin-bottom:2rem; }
-  .login-input {
-    width:100%; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
-    border-radius:8px; color:white; padding:0.85rem 1rem; font-size:1rem;
-    font-family:'DM Sans',sans-serif; margin-bottom:1rem; text-align:center; letter-spacing:0.2em;
-  }
-  .login-input:focus { outline:none; border-color:var(--green-accent); }
-  .login-btn {
-    width:100%; background:var(--green); color:white; border:none;
-    padding:0.9rem; border-radius:8px; font-size:1rem; font-family:'DM Sans',sans-serif;
-    cursor:pointer; transition:background 0.2s;
-  }
-  .login-btn:hover { background:var(--green-light); }
-  .login-error { color:#e74c3c; font-size:0.85rem; margin-top:0.75rem; display:none; }
-
-  /* DASHBOARD */
-  #dashboard { display:none; }
-
-  /* TOPBAR */
-  .topbar {
-    background:var(--navy2); border-bottom:1px solid rgba(255,255,255,0.06);
-    padding:0 2rem; height:64px; display:flex; align-items:center; justify-content:space-between;
-    position:sticky; top:0; z-index:50;
-  }
-  .topbar-logo { font-family:'Playfair Display',serif; color:var(--green-accent); font-size:1.1rem; }
-  .topbar-logo span { color:white; }
-  .topbar-right { display:flex; align-items:center; gap:1rem; }
-  .badge-live { background:rgba(116,198,157,0.15); border:1px solid rgba(116,198,157,0.3); color:var(--green-accent); font-size:0.75rem; padding:0.3rem 0.75rem; border-radius:100px; display:flex; align-items:center; gap:0.4rem; }
-  .badge-live::before { content:'●'; font-size:0.5rem; animation:blink 1.5s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .logout-btn { background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.3); color:#e74c3c; padding:0.4rem 1rem; border-radius:6px; cursor:pointer; font-size:0.85rem; font-family:'DM Sans',sans-serif; transition:background 0.2s; }
-  .logout-btn:hover { background:rgba(231,76,60,0.25); }
-
-  /* MAIN */
-  .main { padding:2rem; max-width:1400px; margin:0 auto; }
-
-  /* STATS CARDS */
-  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
-  .stat-card {
-    background:var(--navy2); border:1px solid rgba(255,255,255,0.06);
-    border-radius:12px; padding:1.5rem; position:relative; overflow:hidden;
-  }
-  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
-  .stat-card.green::before { background:var(--green-accent); }
-  .stat-card.blue::before { background:var(--blue); }
-  .stat-card.yellow::before { background:var(--yellow); }
-  .stat-card.red::before { background:var(--red); }
-  .stat-label { color:var(--text-muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem; }
-  .stat-value { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:white; line-height:1; }
-  .stat-sub { color:var(--text-muted); font-size:0.78rem; margin-top:0.4rem; }
-  .stat-icon { position:absolute; right:1.2rem; top:50%; transform:translateY(-50%); font-size:2rem; opacity:0.15; }
-
-  /* GRID LAYOUT */
-  .content-grid { display:grid; grid-template-columns:1fr 320px; gap:1.5rem; }
-
-  /* TABLE */
-  .panel { background:var(--navy2); border:1px solid rgba(255,255,255,0.06); border-radius:12px; overflow:hidden; }
-  .panel-header { padding:1.2rem 1.5rem; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; }
-  .panel-title { font-size:0.95rem; font-weight:500; }
-  .panel-actions { display:flex; gap:0.5rem; }
-  .search-input {
-    background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1);
-    border-radius:6px; color:white; padding:0.4rem 0.8rem; font-size:0.82rem;
-    font-family:'DM Sans',sans-serif; width:200px;
-  }
-  .search-input::placeholder { color:rgba(255,255,255,0.3); }
-  .search-input:focus { outline:none; border-color:var(--green-accent); }
-  .export-btn {
-    background:var(--green); color:white; border:none; padding:0.4rem 1rem;
-    border-radius:6px; font-size:0.82rem; font-family:'DM Sans',sans-serif;
-    cursor:pointer; transition:background 0.2s;
-  }
-  .export-btn:hover { background:var(--green-light); }
-
-  .table-wrap { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; }
-  th { padding:0.75rem 1rem; text-align:left; font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid rgba(255,255,255,0.06); white-space:nowrap; }
-  td { padding:0.85rem 1rem; font-size:0.88rem; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:middle; }
-  tr:last-child td { border-bottom:none; }
-  tr:hover td { background:rgba(255,255,255,0.02); }
-  .area-badge { background:rgba(116,198,157,0.12); border:1px solid rgba(116,198,157,0.25); color:var(--green-accent); font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:100px; white-space:nowrap; }
-  .empty-state { text-align:center; padding:3rem; color:var(--text-muted); font-size:0.9rem; }
-  .loading-state { text-align:center; padding:3rem; color:var(--text-muted); font-size:0.9rem; }
-
-  /* SIDEBAR */
-  .sidebar { display:flex; flex-direction:column; gap:1rem; }
-  .area-list { list-style:none; display:flex; flex-direction:column; gap:0.5rem; }
-  .area-item { display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid rgba(255,255,255,0.04); }
-  .area-item:last-child { border-bottom:none; }
-  .area-name { font-size:0.85rem; color:rgba(255,255,255,0.7); }
-  .area-count { font-size:0.85rem; font-weight:500; color:var(--green-accent); }
-  .area-bar-wrap { height:4px; background:rgba(255,255,255,0.06); border-radius:4px; margin-top:0.3rem; overflow:hidden; }
-  .area-bar { height:100%; background:linear-gradient(90deg,var(--green),var(--green-accent)); border-radius:4px; }
-
-  /* REFRESH BTN */
-  .refresh-btn {
-    background:rgba(116,198,157,0.1); border:1px solid rgba(116,198,157,0.2);
-    color:var(--green-accent); padding:0.4rem 0.8rem; border-radius:6px;
-    font-size:0.78rem; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.2s;
-  }
-  .refresh-btn:hover { background:rgba(116,198,157,0.2); }
-
-  /* RESPONSIVE */
-  @media(max-width:900px) {
-    .stats-grid { grid-template-columns:1fr 1fr; }
-    .content-grid { grid-template-columns:1fr; }
-  }
-  @media(max-width:560px) {
-    .stats-grid { grid-template-columns:1fr; }
-    .main { padding:1rem; }
-  }
+:root{--n:#0D1B2A;--n2:#132337;--n3:#1a2f45;--n4:#0a1520;--g:#2D6A4F;--gl:#40916C;--ga:#74C69D;--r:#e74c3c;--y:#f0a500;--b:#3b82f6;--p:#8b5cf6;--tx:rgba(255,255,255,0.85);--mu:rgba(255,255,255,0.45);--bd:rgba(255,255,255,0.07);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--n4);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;}
+/* LOGIN */
+#loginWrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(45,106,79,0.12) 0%,transparent 70%);}
+.lcard{background:var(--n2);border:1px solid rgba(116,198,157,0.2);border-radius:20px;padding:3rem;width:100%;max-width:380px;text-align:center;}
+.lcard .ico{font-size:2.5rem;margin-bottom:1rem;}
+.lcard h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:0.4rem;}
+.lcard p{color:var(--mu);font-size:0.85rem;margin-bottom:2rem;line-height:1.5;}
+.inp{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:white;padding:0.8rem 1rem;font-size:0.95rem;font-family:'DM Sans',sans-serif;margin-bottom:1rem;transition:border-color .2s;}
+.inp:focus{outline:none;border-color:var(--ga);}
+.inp::placeholder{color:rgba(255,255,255,0.25);}
+.btn-l{background:var(--g);color:white;border:none;padding:.85rem 1.5rem;border-radius:8px;font-size:.95rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s;width:100%;}
+.btn-l:hover{background:var(--gl);}
+.lerr{color:var(--r);font-size:.82rem;margin-top:.5rem;display:none;}
+/* SHELL */
+#app{display:none;flex:1;flex-direction:column;}
+.topbar{background:var(--n2);border-bottom:1px solid var(--bd);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100;}
+.tlogo{font-family:'Playfair Display',serif;color:var(--ga);font-size:1rem;}
+.tlogo span{color:white;}
+.live{background:rgba(116,198,157,0.12);border:1px solid rgba(116,198,157,0.25);color:var(--ga);font-size:.72rem;padding:.25rem .65rem;border-radius:100px;display:flex;align-items:center;gap:.35rem;}
+.live::before{content:'●';font-size:.45rem;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.ibtn{background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--mu);padding:.35rem .8rem;border-radius:6px;cursor:pointer;font-size:.8rem;font-family:'DM Sans',sans-serif;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;}
+.ibtn:hover{background:rgba(255,255,255,.1);color:white;}
+.obtn{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.25);color:var(--r);padding:.35rem .8rem;border-radius:6px;cursor:pointer;font-size:.8rem;font-family:'DM Sans',sans-serif;}
+.shell{display:flex;flex:1;}
+/* SIDEBAR */
+.sb{width:220px;background:var(--n2);border-right:1px solid var(--bd);padding:1.2rem 0;flex-shrink:0;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;}
+.nlabel{color:var(--mu);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;padding:0 1.2rem;margin-bottom:.4rem;}
+.ngrp{margin-bottom:1.5rem;}
+.ni{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;cursor:pointer;color:rgba(255,255,255,.55);font-size:.85rem;border-left:2px solid transparent;transition:all .15s;}
+.ni:hover{background:rgba(255,255,255,.04);color:white;}
+.ni.on{background:rgba(116,198,157,.08);color:var(--ga);border-left-color:var(--ga);}
+/* CONTENT */
+.content{flex:1;padding:2rem;overflow-y:auto;}
+.pg{display:none;}
+.pg.on{display:block;}
+.ptitle{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:.3rem;}
+.psub{color:var(--mu);font-size:.85rem;margin-bottom:2rem;}
+/* STAT CARDS */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.sc{background:var(--n2);border:1px solid var(--bd);border-radius:12px;padding:1.3rem;position:relative;overflow:hidden;}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.sc.cg::after{background:linear-gradient(90deg,var(--g),var(--ga));}
+.sc.cb::after{background:linear-gradient(90deg,#1d4ed8,var(--b));}
+.sc.cy::after{background:linear-gradient(90deg,#b45309,var(--y));}
+.sc.cp::after{background:linear-gradient(90deg,#6d28d9,var(--p));}
+.sl{color:var(--mu);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;}
+.sv{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;line-height:1;}
+.ss{color:var(--mu);font-size:.75rem;margin-top:.3rem;}
+.sico{position:absolute;right:1rem;top:50%;transform:translateY(-50%);font-size:1.8rem;opacity:.12;}
+/* CARD */
+.card{background:var(--n2);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:1.5rem;}
+.chdr{padding:1rem 1.3rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.ctitle{font-size:.9rem;font-weight:500;}
+.cbody{padding:1.3rem;}
+/* BUTTONS */
+.bs{background:var(--g);color:white;border:none;padding:.4rem .9rem;border-radius:6px;font-size:.8rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s;}
+.bs:hover{background:var(--gl);}
+.bs:disabled{opacity:.5;cursor:not-allowed;}
+.bo{background:transparent;border:1px solid var(--bd);color:var(--mu);padding:.4rem .9rem;border-radius:6px;font-size:.8rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;}
+.bo:hover{border-color:var(--ga);color:var(--ga);}
+.br2{background:rgba(231,76,60,.15);border:1px solid rgba(231,76,60,.3);color:var(--r);padding:.4rem .7rem;border-radius:6px;font-size:.8rem;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.bgrp{display:flex;gap:.5rem;flex-wrap:wrap;}
+/* FORMS */
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.fg{display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;}
+.fg label{color:var(--mu);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;}
+.fg input,.fg select,.fg textarea{background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:7px;color:white;padding:.65rem .9rem;font-size:.88rem;font-family:'DM Sans',sans-serif;transition:border-color .2s;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--ga);}
+.fg textarea{resize:vertical;min-height:90px;line-height:1.6;}
+.fg select option{background:var(--n2);}
+.fg input::placeholder,.fg textarea::placeholder{color:rgba(255,255,255,.2);}
+/* EDITOR */
+.etbar{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-bottom:none;border-radius:8px 8px 0 0;padding:.5rem .75rem;display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;}
+.tb{background:transparent;border:1px solid transparent;color:var(--mu);padding:.25rem .5rem;border-radius:4px;cursor:pointer;font-size:.82rem;font-family:'DM Sans',sans-serif;transition:all .15s;min-width:28px;text-align:center;}
+.tb:hover{background:rgba(255,255,255,.08);color:white;}
+.tsep{width:1px;background:var(--bd);height:18px;margin:0 .2rem;}
+.ebox{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:0 0 8px 8px;min-height:260px;padding:1rem;color:white;font-size:.9rem;line-height:1.7;outline:none;}
+.ebox:focus{border-color:rgba(116,198,157,.3);}
+.ebox h1,.ebox h2,.ebox h3{font-family:'Playfair Display',serif;margin:.5rem 0;}
+.ebox blockquote{border-left:3px solid var(--ga);padding-left:1rem;color:var(--mu);margin:.5rem 0;}
+.ebox ul,.ebox ol{padding-left:1.5rem;}
+/* TABLE */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{padding:.65rem 1rem;text-align:left;font-size:.72rem;color:var(--mu);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--bd);white-space:nowrap;}
+td{padding:.8rem 1rem;font-size:.85rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.bdg{display:inline-flex;align-items:center;font-size:.72rem;padding:.2rem .6rem;border-radius:100px;white-space:nowrap;}
+.bg{background:rgba(116,198,157,.12);border:1px solid rgba(116,198,157,.25);color:var(--ga);}
+.by{background:rgba(240,165,0,.12);border:1px solid rgba(240,165,0,.25);color:var(--y);}
+.br3{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.25);color:var(--r);}
+.bb{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);color:var(--b);}
+.empty{text-align:center;padding:2.5rem;color:var(--mu);font-size:.88rem;}
+/* SEARCH */
+.sbar{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.sinp{background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:7px;color:white;padding:.55rem .9rem;font-size:.85rem;font-family:'DM Sans',sans-serif;flex:1;min-width:180px;}
+.sinp:focus{outline:none;border-color:var(--ga);}
+.sinp::placeholder{color:rgba(255,255,255,.2);}
+.fsel{background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:7px;color:white;padding:.55rem .9rem;font-size:.85rem;font-family:'DM Sans',sans-serif;}
+.fsel option{background:var(--n2);}
+/* TABS */
+.tabs{display:flex;gap:.3rem;margin-bottom:1.5rem;border-bottom:1px solid var(--bd);}
+.tab{padding:.6rem 1rem;cursor:pointer;font-size:.85rem;color:var(--mu);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+.tab:hover{color:white;}
+.tab.on{color:var(--ga);border-bottom-color:var(--ga);}
+/* NEWS */
+.ngrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.nitem{background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:10px;padding:1.2rem;transition:border-color .2s;}
+.ntag{color:var(--ga);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+.ntitle{font-size:.9rem;font-weight:500;line-height:1.45;margin-bottom:.5rem;}
+.nsum{color:var(--mu);font-size:.8rem;line-height:1.55;margin-bottom:1rem;}
+.nfoot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;}
+/* AI PANEL */
+.aipanel{background:linear-gradient(135deg,rgba(45,106,79,.15),rgba(116,198,157,.05));border:1px solid rgba(116,198,157,.2);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;}
+.aipanel h4{color:var(--ga);font-size:.9rem;font-weight:500;margin-bottom:.5rem;}
+.aipanel p{color:var(--mu);font-size:.82rem;line-height:1.55;margin-bottom:1rem;}
+.spnwrap{display:none;align-items:center;gap:.75rem;color:var(--ga);font-size:.85rem;margin-top:1rem;}
+.spn{width:18px;height:18px;border:2px solid rgba(116,198,157,.2);border-top-color:var(--ga);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* PROGRESS */
+.pw{margin-bottom:.75rem;}
+.pl{display:flex;justify-content:space-between;font-size:.78rem;color:var(--mu);margin-bottom:.3rem;}
+.pb{height:5px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}
+.pf{height:100%;background:linear-gradient(90deg,var(--g),var(--ga));border-radius:4px;transition:width .5s ease;}
+/* CARTILHA */
+.csb{background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:10px;padding:1.2rem;margin-bottom:1rem;}
+.csh{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
+.csn{font-family:'Playfair Display',serif;color:var(--ga);font-size:1.2rem;font-weight:700;}
+/* NOTIF */
+.notif{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--n2);border:1px solid rgba(116,198,157,.3);border-radius:10px;padding:1rem 1.3rem;font-size:.88rem;z-index:999;display:none;animation:si .3s ease;max-width:300px;}
+.notif.on{display:flex;align-items:center;gap:.6rem;}
+.notif.err{border-color:rgba(231,76,60,.3);background:rgba(231,76,60,.08);}
+@keyframes si{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+@media(max-width:768px){.sb{display:none;}.srow{grid-template-columns:1fr 1fr;}.ngrid{grid-template-columns:1fr;}.frow{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="icon">🔒</div>
+<div id="loginWrap">
+  <div class="lcard">
+    <div class="ico">🔒</div>
     <h2>Painel Administrativo</h2>
-    <p>Integridade Esportiva · USP<br>Digite a senha para acessar</p>
-    <input type="password" class="login-input" id="senhaInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrar()">
-    <button class="login-btn" onclick="entrar()">Entrar</button>
-    <div class="login-error" id="loginError">Senha incorreta. Tente novamente.</div>
+    <p>Integridade Esportiva · USP<br>Área restrita para administradores</p>
+    <input class="inp" type="text" id="lu" placeholder="Usuário" autocomplete="off">
+    <input class="inp" type="password" id="lp" placeholder="Senha" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-l" onclick="doLogin()">Entrar no painel</button>
+    <div class="lerr" id="lerr">Credenciais incorretas.</div>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard">
+<!-- APP -->
+<div id="app">
   <div class="topbar">
-    <div class="topbar-logo">Painel<span>Admin</span></div>
-    <div class="topbar-right">
-      <div class="badge-live">Dados em tempo real</div>
-      <button class="logout-btn" onclick="sair()">Sair</button>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <div class="tlogo">Painel<span>Admin</span></div>
+      <div class="live">Ao vivo</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <a href="index.html" class="ibtn">← Site público</a>
+      <button class="ibtn" onclick="salvarTudo()">💾 Salvar tudo</button>
+      <button class="obtn" onclick="doLogout()">Sair</button>
     </div>
   </div>
 
-  <div class="main">
-    <!-- STATS -->
-    <div class="stats-grid">
-      <div class="stat-card green">
-        <div class="stat-label">Total de assinaturas</div>
-        <div class="stat-value" id="statTotal">—</div>
-        <div class="stat-sub" id="statUltima">Carregando...</div>
-        <div class="stat-icon">✍️</div>
+  <div class="shell">
+    <!-- SIDEBAR -->
+    <div class="sb">
+      <div class="ngrp">
+        <div class="nlabel">Principal</div>
+        <div class="ni on" onclick="goPage('overview')" id="n-overview">📊 Visão Geral</div>
+        <div class="ni" onclick="goPage('usuarios')" id="n-usuarios">👥 Usuários</div>
       </div>
-      <div class="stat-card blue">
-        <div class="stat-label">Áreas representadas</div>
-        <div class="stat-value" id="statAreas">—</div>
-        <div class="stat-sub">categorias profissionais</div>
-        <div class="stat-icon">👥</div>
+      <div class="ngrp">
+        <div class="nlabel">Conteúdo</div>
+        <div class="ni" onclick="goPage('noticias')" id="n-noticias">📰 Notícias IA</div>
+        <div class="ni" onclick="goPage('artigos')" id="n-artigos">✍️ Artigos</div>
+        <div class="ni" onclick="goPage('cartilha')" id="n-cartilha">📚 Cartilha</div>
       </div>
-      <div class="stat-card yellow">
-        <div class="stat-label">Esta semana</div>
-        <div class="stat-value" id="statSemana">—</div>
-        <div class="stat-sub">novas adesões</div>
-        <div class="stat-icon">📅</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-label">Hoje</div>
-        <div class="stat-value" id="statHoje">—</div>
-        <div class="stat-sub">assinaturas hoje</div>
-        <div class="stat-icon">⚡</div>
+      <div class="ngrp">
+        <div class="nlabel">Configurações</div>
+        <div class="ni" onclick="goPage('site')" id="n-site">🌐 Editor do Site</div>
+        <div class="ni" onclick="goPage('lgpd')" id="n-lgpd">🔐 LGPD & Termos</div>
+        <div class="ni" onclick="goPage('logs')" id="n-logs">📋 Logs</div>
       </div>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content-grid">
-      <!-- TABLE -->
-      <div class="panel">
-        <div class="panel-header">
-          <span class="panel-title">📋 Todas as Assinaturas</span>
-          <div class="panel-actions">
-            <input type="text" class="search-input" id="searchInput" placeholder="Buscar por nome..." oninput="filtrarTabela()">
-            <button class="refresh-btn" onclick="carregarDados()">🔄 Atualizar</button>
-            <button class="export-btn" onclick="exportarCSV()">⬇️ Exportar CSV</button>
-          </div>
+    <!-- CONTEÚDO -->
+    <div class="content">
+
+      <!-- VISÃO GERAL -->
+      <div class="pg on" id="p-overview">
+        <div class="ptitle">Visão Geral</div>
+        <div class="psub">Resumo em tempo real do sistema</div>
+        <div class="srow">
+          <div class="sc cg"><div class="sl">Assinaturas</div><div class="sv" id="ovTot">—</div><div class="ss">total registradas</div><div class="sico">✍️</div></div>
+          <div class="sc cb"><div class="sl">Artigos</div><div class="sv" id="ovArt">0</div><div class="ss">publicados</div><div class="sico">📝</div></div>
+          <div class="sc cy"><div class="sl">Notícias Pendentes</div><div class="sv" id="ovPend">0</div><div class="ss">aguardando aprovação</div><div class="sico">⏳</div></div>
+          <div class="sc cp"><div class="sl">Hoje</div><div class="sv" id="ovHoje">—</div><div class="ss">assinaturas hoje</div><div class="sico">⚡</div></div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Nome</th>
-                <th>E-mail</th>
-                <th>Área</th>
-                <th>Data</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaBody">
-              <tr><td colspan="5" class="loading-state">⏳ Carregando dados...</td></tr>
-            </tbody>
-          </table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+          <div class="card">
+            <div class="chdr"><span class="ctitle">📊 Por Área</span><button class="bs" onclick="loadData()">🔄</button></div>
+            <div class="cbody" id="ovAreas"><div style="color:var(--mu);font-size:.85rem">Carregando...</div></div>
+          </div>
+          <div class="card">
+            <div class="chdr"><span class="ctitle">🕐 Últimas Assinaturas</span></div>
+            <div class="tw"><table><thead><tr><th>Nome</th><th>Área</th><th>Data</th></tr></thead><tbody id="ovRec"><tr><td colspan="3" class="empty">Carregando...</td></tr></tbody></table></div>
+          </div>
         </div>
       </div>
 
-      <!-- SIDEBAR -->
-      <div class="sidebar">
-        <div class="panel">
-          <div class="panel-header"><span class="panel-title">📊 Por Área de Atuação</span></div>
-          <div style="padding:1rem 1.5rem">
-            <ul class="area-list" id="areaList">
-              <li style="color:rgba(255,255,255,0.4);font-size:0.85rem;padding:1rem 0;text-align:center">Carregando...</li>
-            </ul>
-          </div>
+      <!-- USUÁRIOS -->
+      <div class="pg" id="p-usuarios">
+        <div class="ptitle">Usuários Cadastrados</div>
+        <div class="psub">Todos os profissionais que assinaram o compromisso</div>
+        <div class="sbar">
+          <input class="sinp" type="text" id="uQ" placeholder="Buscar nome, e-mail ou área..." oninput="filterU()">
+          <select class="fsel" id="uF" onchange="filterU()">
+            <option value="">Todas as áreas</option>
+            <option>Jogador(a)</option><option>Árbitro(a)</option><option>Assistente de Arbitragem</option>
+            <option>Treinador(a)</option><option>Comissão Técnica</option><option>Dirigente / Gestor(a)</option>
+            <option>Jornalista</option><option>Apresentador(a)</option><option>Gandula</option>
+            <option>Segurança</option><option>Torcida Organizada</option><option>Estudante</option><option>Outro</option>
+          </select>
+          <button class="bs" onclick="exportCSV()">⬇️ CSV</button>
+          <button class="bo" onclick="loadData()">🔄</button>
         </div>
+        <div class="card">
+          <div class="tw"><table>
+            <thead><tr><th>#</th><th>Nome</th><th>E-mail</th><th>Área</th><th>Telefone</th><th>Data</th></tr></thead>
+            <tbody id="uTable"><tr><td colspan="6" class="empty">⏳ Carregando...</td></tr></tbody>
+          </table></div>
+        </div>
+      </div>
 
-        <div class="panel">
-          <div class="panel-header"><span class="panel-title">🔗 Links Úteis</span></div>
-          <div style="padding:1rem 1.5rem;display:flex;flex-direction:column;gap:0.6rem">
-            <a href="index.html" style="color:var(--green-accent);font-size:0.85rem;text-decoration:none">← Voltar ao site</a>
-            <a href="https://docs.google.com/spreadsheets" target="_blank" style="color:var(--green-accent);font-size:0.85rem;text-decoration:none">📊 Abrir Google Sheets</a>
+      <!-- NOTÍCIAS IA -->
+      <div class="pg" id="p-noticias">
+        <div class="ptitle">Notícias com Inteligência Artificial</div>
+        <div class="psub">Gere, revise e publique notícias automaticamente com IA</div>
+        <div class="aipanel">
+          <h4>🤖 Gerador de Notícias com IA</h4>
+          <p>A IA gera sugestões de notícias sobre apostas esportivas e integridade. Você revisa e aprova cada uma antes de publicar. Usa a API gratuita do Claude — sem custo adicional.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+            <div class="fg" style="margin:0"><label>Tema</label>
+              <select id="aiTema">
+                <option>Manipulação de resultados</option><option>Regulamentação das apostas</option>
+                <option>Investigações esportivas</option><option>Contratos com casas de apostas</option>
+                <option>Integridade no futebol</option><option>Casos internacionais</option>
+                <option>Proteção de atletas</option>
+              </select>
+            </div>
+            <div class="fg" style="margin:0"><label>Quantidade</label>
+              <select id="aiQtd"><option value="3">3 sugestões</option><option value="5" selected>5 sugestões</option><option value="10">10 sugestões</option></select>
+            </div>
+          </div>
+          <button class="bs" id="btnGerar" onclick="gerarNots()">✨ Gerar Sugestões com IA</button>
+          <div class="spnwrap" id="aiLoad"><div class="spn"></div> Gerando notícias com IA...</div>
+        </div>
+        <div class="tabs">
+          <div class="tab on" onclick="showNTab('pend',this)">⏳ Pendentes (<span id="cntP">0</span>)</div>
+          <div class="tab" onclick="showNTab('aprov',this)">✅ Aprovadas (<span id="cntA">0</span>)</div>
+          <div class="tab" onclick="showNTab('publ',this)">🌐 Publicadas (<span id="cntPub">0</span>)</div>
+        </div>
+        <div id="nt-pend"><div class="ngrid" id="gPend"><div class="empty" style="grid-column:1/-1">Clique em "Gerar" para começar.</div></div></div>
+        <div id="nt-aprov" style="display:none"><div class="ngrid" id="gAprov"><div class="empty" style="grid-column:1/-1">Nenhuma aprovada ainda.</div></div></div>
+        <div id="nt-publ" style="display:none"><div class="ngrid" id="gPubl"><div class="empty" style="grid-column:1/-1">Nenhuma publicada ainda.</div></div></div>
+      </div>
+
+      <!-- ARTIGOS -->
+      <div class="pg" id="p-artigos">
+        <div class="ptitle">Artigos</div>
+        <div class="psub">Crie e gerencie artigos educativos com editor rico</div>
+        <div style="display:grid;grid-template-columns:1fr 300px;gap:1.5rem;align-items:start">
+          <div class="card">
+            <div class="chdr">
+              <span class="ctitle">✍️ Novo Artigo</span>
+              <div class="bgrp"><button class="bo" onclick="clearArt()">Limpar</button><button class="bs" onclick="saveArt()">Publicar Artigo</button></div>
+            </div>
+            <div class="cbody">
+              <div class="frow">
+                <div class="fg"><label>Título *</label><input type="text" id="aT" placeholder="Título do artigo"></div>
+                <div class="fg"><label>Autor *</label><input type="text" id="aA" placeholder="Nome do autor"></div>
+              </div>
+              <div class="frow">
+                <div class="fg"><label>Categoria</label>
+                  <select id="aC"><option>Integridade Esportiva</option><option>Apostas Esportivas</option><option>Legislação</option><option>Casos Reais</option><option>Prevenção</option></select>
+                </div>
+                <div class="fg"><label>Link da Fonte</label><input type="url" id="aF" placeholder="https://..."></div>
+              </div>
+              <div class="fg"><label>Resumo</label><textarea id="aR" placeholder="Breve resumo do artigo..." style="min-height:65px"></textarea></div>
+              <div class="fg">
+                <label>Conteúdo * &nbsp; <button class="bs" onclick="artIA()" style="font-size:.72rem;padding:.2rem .6rem">✨ Gerar com IA</button></label>
+                <div class="etbar">
+                  <button class="tb" onclick="ef('bold')"><b>B</b></button>
+                  <button class="tb" onclick="ef('italic')"><i>I</i></button>
+                  <button class="tb" onclick="ef('underline')"><u>U</u></button>
+                  <div class="tsep"></div>
+                  <button class="tb" onclick="efb('h1')">H1</button>
+                  <button class="tb" onclick="efb('h2')">H2</button>
+                  <button class="tb" onclick="efb('h3')">H3</button>
+                  <div class="tsep"></div>
+                  <button class="tb" onclick="ef('insertUnorderedList')">≡</button>
+                  <button class="tb" onclick="ef('insertOrderedList')">①</button>
+                  <button class="tb" onclick="efb('blockquote')">❝</button>
+                  <div class="tsep"></div>
+                  <button class="tb" onclick="insLnk()">🔗</button>
+                  <button class="tb" onclick="ef('justifyLeft')">◀</button>
+                  <button class="tb" onclick="ef('justifyCenter')">■</button>
+                  <button class="tb" onclick="ef('justifyRight')">▶</button>
+                </div>
+                <div class="ebox" id="aE" contenteditable="true"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="chdr"><span class="ctitle">📋 Publicados</span></div>
+            <div id="artList" style="padding:.75rem"><div class="empty">Nenhum artigo ainda.</div></div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+
+      <!-- CARTILHA -->
+      <div class="pg" id="p-cartilha">
+        <div class="ptitle">Editor da Cartilha</div>
+        <div class="psub">Edite o conteúdo completo das seções da cartilha educativa</div>
+        <div class="card">
+          <div class="chdr"><span class="ctitle">📚 Seções da Cartilha</span><button class="bs" onclick="saveCart()">💾 Salvar Cartilha</button></div>
+          <div class="cbody" id="cartEd"></div>
+        </div>
+      </div>
+
+      <!-- EDITOR SITE -->
+      <div class="pg" id="p-site">
+        <div class="ptitle">Editor do Site</div>
+        <div class="psub">Edite os textos institucionais do site público</div>
+        <div class="card">
+          <div class="chdr"><span class="ctitle">🏠 Homepage</span><button class="bs" onclick="saveSite()">💾 Salvar</button></div>
+          <div class="cbody">
+            <div class="fg"><label>Título principal</label><input type="text" id="sT" value="Esporte limpo começa com você."></div>
+            <div class="fg"><label>Descrição hero</label><textarea id="sD">Uma iniciativa da USP para promover a integridade nas apostas esportivas, educar profissionais do esporte e prevenir a manipulação de resultados no Brasil.</textarea></div>
+            <div class="fg"><label>Badge do topo</label><input type="text" id="sB" value="Projeto Educativo · USP"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr"><span class="ctitle">📞 Contato & Rodapé</span></div>
+          <div class="cbody">
+            <div class="frow">
+              <div class="fg"><label>E-mail</label><input type="email" id="sE" value="integridade@usp.br"></div>
+              <div class="fg"><label>Telefone</label><input type="text" id="sTel" value="(11) 3091-0000"></div>
+            </div>
+            <div class="fg"><label>Endereço</label><input type="text" id="sEnd" value="USP — São Paulo, SP"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LGPD & TERMOS -->
+      <div class="pg" id="p-lgpd">
+        <div class="ptitle">LGPD & Termos</div>
+        <div class="psub">Configure consentimento, termos de uso e privacidade</div>
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="chdr"><span class="ctitle">⚙️ Configurações de Consentimento</span></div>
+          <div class="cbody" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div style="background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:8px;padding:1rem">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem"><span style="font-size:.88rem">Banner LGPD ativo</span><input type="checkbox" id="lgOn" checked style="accent-color:var(--ga);width:16px;height:16px"></div>
+              <p style="color:var(--mu);font-size:.78rem">Exibe aviso de cookies ao entrar no site</p>
+            </div>
+            <div style="background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:8px;padding:1rem">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem"><span style="font-size:.88rem">Consentimento obrigatório</span><input type="checkbox" id="lgOb" checked style="accent-color:var(--ga);width:16px;height:16px"></div>
+              <p style="color:var(--mu);font-size:.78rem">Bloqueia o site até o usuário aceitar</p>
+            </div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:10px;padding:1.2rem;margin-bottom:1rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><span style="font-size:.9rem;font-weight:500">📄 Termos de Uso</span><button class="bs" onclick="saveTer()">Salvar</button></div>
+          <div class="etbar" style="border-radius:7px 7px 0 0"><button class="tb" onclick="ge('bold','tE')"><b>B</b></button><button class="tb" onclick="ge('italic','tE')"><i>I</i></button><button class="tb" onclick="geb('h2','tE')">H2</button><button class="tb" onclick="ge('insertUnorderedList','tE')">≡</button></div>
+          <div class="ebox" id="tE" contenteditable="true"><h2>Termos de Uso</h2><p>Ao utilizar este site, você concorda com os presentes termos.</p><h2>1. Objetivo</h2><p>Este site tem finalidade exclusivamente educativa e informativa, promovendo a integridade nas apostas esportivas.</p><h2>2. Uso dos Dados</h2><p>Os dados coletados serão utilizados exclusivamente para fins de pesquisa acadêmica, em conformidade com a LGPD.</p><h2>3. Responsabilidades</h2><p>O usuário é responsável pela veracidade das informações fornecidas.</p></div>
+        </div>
+        <div style="background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:10px;padding:1.2rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><span style="font-size:.9rem;font-weight:500">🔒 Política de Privacidade</span><button class="bs" onclick="savePriv()">Salvar</button></div>
+          <div class="etbar" style="border-radius:7px 7px 0 0"><button class="tb" onclick="ge('bold','pE')"><b>B</b></button><button class="tb" onclick="ge('italic','pE')"><i>I</i></button><button class="tb" onclick="geb('h2','pE')">H2</button></div>
+          <div class="ebox" id="pE" contenteditable="true"><h2>Política de Privacidade</h2><p>Esta política descreve como coletamos, usamos e protegemos seus dados pessoais.</p><h2>Dados Coletados</h2><p>Coletamos: nome completo, CPF, e-mail, telefone e área de atuação, para fins de identificação e pesquisa acadêmica.</p><h2>Base Legal</h2><p>O tratamento é realizado com base no consentimento explícito, conforme Art. 7º, inciso I da Lei nº 13.709/2018 (LGPD).</p><h2>Seus Direitos</h2><p>Você pode solicitar acesso, correção ou exclusão de seus dados pelo e-mail integridade@usp.br.</p></div>
+        </div>
+      </div>
+
+      <!-- LOGS -->
+      <div class="pg" id="p-logs">
+        <div class="ptitle">Logs do Sistema</div>
+        <div class="psub">Registro de todas as atividades administrativas</div>
+        <div class="card">
+          <div class="tw"><table>
+            <thead><tr><th>Data/Hora</th><th>Ação</th><th>Usuário</th><th>Detalhe</th></tr></thead>
+            <tbody id="logsTb"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /shell -->
+</div><!-- /app -->
+
+<div class="notif" id="notif"></div>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzrSOeOCGwtagi-7Ofk5zQv04e2j6VgKaq-TYKT5gc4oh6CBSu7Gqch-LSXrZDOIvKN/exec';
-  const SENHA = 'integridade2024'; // ← VOCÊ PODE MUDAR ESTA SENHA
-  let todosOsDados = [];
+const SHEET='https://script.google.com/macros/s/AKfycbzrSOeOCGwtagi-7Ofk5zQv04e2j6VgKaq-TYKT5gc4oh6CBSu7Gqch-LSXrZDOIvKN/exec';
+const CLAUDE='https://api.anthropic.com/v1/messages';
+const ADM_U='admin', ADM_P='integridade2024'; // ← Mude a senha aqui
 
-  function entrar() {
-    const s = document.getElementById('senhaInput').value;
-    if (s === SENHA) {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      carregarDados();
-    } else {
-      document.getElementById('loginError').style.display = 'block';
-      document.getElementById('senhaInput').value = '';
-    }
+let users=[], arts=JSON.parse(localStorage.getItem('ie_arts')||'[]');
+let nots={pend:[],aprov:[],publ:[]};
+let cart=JSON.parse(localStorage.getItem('ie_cart')||'null')||defaultCart();
+let logs=JSON.parse(localStorage.getItem('ie_logs')||'[]');
+
+function defaultCart(){return[
+  {id:1,titulo:'O que são apostas esportivas',txt:'As apostas esportivas são atividades onde participantes preveem resultados de eventos. No Brasil, o mercado cresceu com o futebol, tornando-se regulamentado em 2023.'},
+  {id:2,titulo:'Manipulação de resultados',txt:'Manipulação envolve ações ilegais para alterar resultados de competições. É crime e compromete a integridade do esporte.'},
+  {id:3,titulo:'Punições e consequências',txt:'Punições variam desde multas até proibição permanente de participação em eventos esportivos.'},
+  {id:4,titulo:'Aliciamento de atletas e árbitros',txt:'Aliciamento é persuadir atletas ou árbitros a agirem de forma antiética. É crime e deve ser denunciado imediatamente.'},
+  {id:5,titulo:'Como identificar abordagens suspeitas',txt:'Fique atento a propostas financeiras incomuns, pressões para alterar desempenho e contatos de desconhecidos oferecendo vantagens.'},
+  {id:6,titulo:'Canais de denúncia',txt:'Denuncie anonimamente: Polícia Federal, Ministério Público, CBF Integrity, FIFA Integrity e federações estaduais.'},
+  {id:7,titulo:'Direitos do denunciante',txt:'O denunciante tem direito ao anonimato, proteção contra retaliações e sigilo das informações prestadas.'},
+  {id:8,titulo:'Compromisso com a integridade',txt:'Ao assinar, você declara conhecer as regras de integridade e compromete-se a reportar situações suspeitas.'},
+];}
+
+// AUTH
+function doLogin(){
+  const u=document.getElementById('lu').value, p=document.getElementById('lp').value;
+  if(u===ADM_U&&p===ADM_P){
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('app').style.display='flex';
+    addLog('Login','admin','Acesso ao painel');
+    loadData(); renderCart(); renderArts(); renderLogs();
+  } else { document.getElementById('lerr').style.display='block'; }
+}
+function doLogout(){addLog('Logout','admin','');document.getElementById('loginWrap').style.display='flex';document.getElementById('app').style.display='none';}
+
+// NAV
+function goPage(id){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  document.getElementById('n-'+id).classList.add('on');
+}
+
+// DATA
+async function loadData(){
+  try{
+    const r=await fetch(SHEET+'?t='+Date.now());
+    users=(await r.json()).slice(1);
+    updateOv(); renderUsers(users);
+  }catch(e){notif('Erro ao carregar dados.',true);}
+}
+
+function updateOv(){
+  document.getElementById('ovTot').textContent=users.length;
+  document.getElementById('ovArt').textContent=arts.filter(a=>a.pub).length;
+  document.getElementById('ovPend').textContent=nots.pend.length;
+  const hoje=new Date().toDateString();
+  document.getElementById('ovHoje').textContent=users.filter(r=>new Date(r[5]).toDateString()===hoje).length;
+  const am={};users.forEach(r=>{const a=r[4]||'?';am[a]=(am[a]||0)+1;});
+  const s=Object.entries(am).sort((a,b)=>b[1]-a[1]),mx=s[0]?.[1]||1;
+  document.getElementById('ovAreas').innerHTML=s.slice(0,6).map(([a,c])=>`<div class="pw"><div class="pl"><span>${a}</span><span>${c}</span></div><div class="pb"><div class="pf" style="width:${(c/mx*100).toFixed(0)}%"></div></div></div>`).join('')||'<div style="color:var(--mu)">Sem dados</div>';
+  const rec=[...users].reverse().slice(0,5);
+  document.getElementById('ovRec').innerHTML=rec.length?rec.map(r=>`<tr><td style="font-weight:500">${r[0]||'—'}</td><td><span class="bdg bg">${r[4]||'—'}</span></td><td style="color:var(--mu);font-size:.78rem">${r[5]?new Date(r[5]).toLocaleDateString('pt-BR'):'—'}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">Nenhuma ainda</td></tr>';
+}
+
+// USERS
+function renderUsers(d){
+  document.getElementById('uTable').innerHTML=d.length?d.map((r,i)=>`<tr><td style="color:var(--mu)">${d.length-i}</td><td style="font-weight:500">${r[0]||'—'}</td><td style="color:var(--mu)">${r[1]||'—'}</td><td><span class="bdg bg">${r[4]||'—'}</span></td><td style="color:var(--mu)">${r[3]||'—'}</td><td style="color:var(--mu);font-size:.78rem">${r[5]?new Date(r[5]).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}):'—'}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">Nenhum usuário.</td></tr>';
+}
+function filterU(){
+  const q=document.getElementById('uQ').value.toLowerCase(),f=document.getElementById('uF').value;
+  renderUsers(users.filter(r=>(!q||(r[0]||'').toLowerCase().includes(q)||(r[1]||'').toLowerCase().includes(q)||(r[4]||'').toLowerCase().includes(q))&&(!f||r[4]===f)));
+}
+function exportCSV(){
+  if(!users.length){notif('Nenhum dado.',true);return;}
+  const csv=[['Nome','Email','CPF','Telefone','Area','Data'],...users].map(r=>r.map(c=>'"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='assinaturas_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  addLog('Export CSV','admin',users.length+' registros');
+}
+
+// NOTÍCIAS
+async function gerarNots(){
+  const tema=document.getElementById('aiTema').value,qtd=document.getElementById('aiQtd').value;
+  document.getElementById('btnGerar').disabled=true;
+  document.getElementById('aiLoad').style.display='flex';
+  try{
+    const res=await fetch(CLAUDE,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        messages:[{role:'user',content:`Gere ${qtd} sugestões de notícias jornalísticas em português brasileiro sobre: "${tema}" no contexto de integridade esportiva. RESPONDA APENAS com JSON array válido, sem texto extra nem markdown:\n[{"titulo":"...","resumo":"2-3 frases concisas","categoria":"${tema}","origem":"Brasil ou Europa ou América Latina","data":"${new Date().toLocaleDateString('pt-BR')}"}]`}]})});
+    const d=await res.json();
+    const txt=d.content?.[0]?.text||'[]';
+    const novas=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    nots.pend.push(...novas.map((n,i)=>({...n,id:Date.now()+i})));
+    renderNots();notif('✅ '+novas.length+' notícias geradas!');
+    addLog('Geração IA','admin',novas.length+' notícias sobre "'+tema+'"');
+  }catch(e){
+    // Fallback com exemplos
+    const ex=[
+      {titulo:'Investigação aponta irregularidades em apostas no Brasileirão',resumo:'Autoridades esportivas abrem inquérito após padrões suspeitos de apostas. O caso envolve possível manipulação em partidas da última rodada.',categoria:tema,origem:'Brasil',data:new Date().toLocaleDateString('pt-BR')},
+      {titulo:'Nova regulamentação reforça proteção de atletas contra aliciamento',resumo:'Portaria publicada esta semana estabelece regras para proteger jogadores e árbitros de abordagens indevidas de apostadores e intermediários.',categoria:tema,origem:'Brasil',data:new Date().toLocaleDateString('pt-BR')},
+      {titulo:'FIFA amplia programa global de educação sobre integridade nas apostas',resumo:'Entidade mundial treina profissionais de 50 países sobre riscos das apostas e como reportar suspeitas de manipulação de resultados.',categoria:tema,origem:'Europa',data:new Date().toLocaleDateString('pt-BR')},
+    ];
+    nots.pend.push(...ex.map((n,i)=>({...n,id:Date.now()+i})));
+    renderNots();notif('Exemplos criados. Para IA real, verifique as configurações de API.');
   }
+  document.getElementById('btnGerar').disabled=false;
+  document.getElementById('aiLoad').style.display='none';
+}
 
-  function sair() {
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('senhaInput').value = '';
+function renderNots(){
+  const mk=(arr,tipo)=>arr.length?arr.map(n=>`<div class="nitem"><div class="ntag">${n.categoria} · ${n.origem}</div><div class="ntitle">${n.titulo}</div><div class="nsum">${n.resumo}</div><div class="nfoot"><span style="color:var(--mu);font-size:.75rem">${n.data}</span><div class="bgrp">${tipo==='pend'?`<button class="br2" onclick="rejN(${n.id})">✕</button><button class="bs" onclick="aprovN(${n.id})">✓ Aprovar</button>`:tipo==='aprov'?`<button class="bs" onclick="publN(${n.id})">🌐 Publicar</button>`:`<span class="bdg bb">Publicada</span>`}</div></div></div>`).join(''):`<div class="empty" style="grid-column:1/-1">Nenhuma aqui.</div>`;
+  document.getElementById('gPend').innerHTML=mk(nots.pend,'pend');
+  document.getElementById('gAprov').innerHTML=mk(nots.aprov,'aprov');
+  document.getElementById('gPubl').innerHTML=mk(nots.publ,'publ');
+  ['cntP','cntA','cntPub'].forEach((id,i)=>document.getElementById(id).textContent=[nots.pend,nots.aprov,nots.publ][i].length);
+  document.getElementById('ovPend').textContent=nots.pend.length;
+  localStorage.setItem('ie_nots_publ',JSON.stringify(nots.publ));
+}
+function aprovN(id){const i=nots.pend.findIndex(n=>n.id===id);if(i<0)return;nots.aprov.push(nots.pend.splice(i,1)[0]);renderNots();notif('✅ Aprovada!');addLog('Notícia aprovada','admin','id:'+id);}
+function rejN(id){nots.pend=nots.pend.filter(n=>n.id!==id);renderNots();}
+function publN(id){const i=nots.aprov.findIndex(n=>n.id===id);if(i<0)return;nots.publ.push(nots.aprov.splice(i,1)[0]);renderNots();notif('🌐 Publicada no site!');addLog('Notícia publicada','admin','id:'+id);}
+function showNTab(tab,el){
+  document.querySelectorAll('#p-noticias .tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+  ['pend','aprov','publ'].forEach(t=>{const e=document.getElementById('nt-'+t);if(e)e.style.display=t===tab?'block':'none';});
+}
+
+// ARTIGOS — EDITOR
+function ef(cmd){document.getElementById('aE').focus();document.execCommand(cmd,false,null);}
+function efb(tag){document.getElementById('aE').focus();document.execCommand('formatBlock',false,'<'+tag+'>');}
+function ge(cmd,id){document.getElementById(id).focus();document.execCommand(cmd,false,null);}
+function geb(tag,id){document.getElementById(id).focus();document.execCommand('formatBlock',false,'<'+tag+'>');}
+function insLnk(){const u=prompt('URL do link:');if(u){document.getElementById('aE').focus();document.execCommand('createLink',false,u);}}
+
+async function artIA(){
+  const t=document.getElementById('aT').value;
+  if(!t){notif('Informe o título primeiro.',true);return;}
+  notif('⏳ Gerando conteúdo...');
+  try{
+    const res=await fetch(CLAUDE,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        messages:[{role:'user',content:`Escreva um artigo educativo em português brasileiro sobre: "${t}". O artigo deve estar relacionado à integridade nas apostas esportivas. Use HTML simples (<h2>,<p>,<ul>,<li>,<strong>). Máximo 400 palavras. Retorne APENAS o HTML, sem markdown nem explicações.`}]})});
+    const d=await res.json();
+    document.getElementById('aE').innerHTML=d.content?.[0]?.text||'';
+    notif('✅ Conteúdo gerado com IA!');
+  }catch(e){
+    document.getElementById('aE').innerHTML=`<h2>Introdução</h2><p>${t} é um tema essencial para a integridade esportiva no Brasil.</p><h2>Desenvolvimento</h2><p>Escreva aqui o conteúdo sobre ${t}...</p><h2>Conclusão</h2><p>A conscientização sobre ${t} contribui para um esporte mais ético e transparente.</p>`;
+    notif('Esboço criado! Configure a API para geração automática completa.');
   }
+}
+function saveArt(){
+  const t=document.getElementById('aT').value.trim(),a=document.getElementById('aA').value.trim(),c=document.getElementById('aE').innerHTML.trim();
+  if(!t||!a||!c){notif('Preencha título, autor e conteúdo.',true);return;}
+  arts.unshift({id:Date.now(),titulo:t,autor:a,cat:document.getElementById('aC').value,fonte:document.getElementById('aF').value,resumo:document.getElementById('aR').value,html:c,pub:true,data:new Date().toLocaleDateString('pt-BR')});
+  localStorage.setItem('ie_arts',JSON.stringify(arts));
+  renderArts();clearArt();notif('✅ Artigo publicado!');
+  addLog('Artigo publicado','admin',t.slice(0,50));
+  document.getElementById('ovArt').textContent=arts.filter(a=>a.pub).length;
+}
+function clearArt(){['aT','aA','aF','aR'].forEach(id=>document.getElementById(id).value='');document.getElementById('aE').innerHTML='';}
+function renderArts(){
+  document.getElementById('artList').innerHTML=arts.length?arts.map(a=>`<div style="border:1px solid var(--bd);border-radius:8px;padding:.9rem;margin-bottom:.6rem"><div style="display:flex;justify-content:space-between;gap:.5rem;margin-bottom:.3rem"><span style="font-size:.88rem;font-weight:500;line-height:1.4">${a.titulo}</span><button class="br2" onclick="delArt(${a.id})">✕</button></div><div style="color:var(--mu);font-size:.75rem">${a.autor} · ${a.data}</div><div style="margin-top:.4rem"><span class="bdg bg">${a.cat}</span></div></div>`).join(''):'<div class="empty">Nenhum artigo.</div>';
+}
+function delArt(id){arts=arts.filter(a=>a.id!==id);localStorage.setItem('ie_arts',JSON.stringify(arts));renderArts();notif('Artigo removido.');}
 
-  async function carregarDados() {
-    document.getElementById('tabelaBody').innerHTML = '<tr><td colspan="5" class="loading-state">⏳ Carregando dados...</td></tr>';
-    try {
-      const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
-      const data = await res.json();
-      todosOsDados = data.slice(1); // remover cabeçalho
-      atualizarDashboard(todosOsDados);
-    } catch(e) {
-      document.getElementById('tabelaBody').innerHTML = '<tr><td colspan="5" class="empty-state">❌ Erro ao carregar dados. Verifique a conexão.</td></tr>';
-    }
-  }
+// CARTILHA
+function renderCart(){
+  document.getElementById('cartEd').innerHTML=cart.map(s=>`<div class="csb"><div class="csh"><span class="csn">0${s.id}</span></div><div class="fg" style="margin-bottom:.75rem"><label>Título da seção</label><input type="text" value="${s.titulo}" id="ct${s.id}" style="background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:6px;color:white;padding:.6rem .9rem;font-size:.88rem;font-family:'DM Sans',sans-serif;width:100%"></div><label style="color:var(--mu);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.35rem">Conteúdo</label><div style="background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:6px;padding:.75rem;min-height:80px;outline:none;color:var(--tx);font-size:.85rem;line-height:1.6" contenteditable="true" id="cb${s.id}">${s.txt}</div></div>`).join('');
+}
+function saveCart(){
+  cart.forEach(s=>{const t=document.getElementById('ct'+s.id),b=document.getElementById('cb'+s.id);if(t)s.titulo=t.value;if(b)s.txt=b.innerHTML;});
+  localStorage.setItem('ie_cart',JSON.stringify(cart));
+  notif('✅ Cartilha salva!');addLog('Cartilha salva','admin',cart.length+' seções');
+}
 
-  function atualizarDashboard(dados) {
-    // Stats
-    const total = dados.length;
-    document.getElementById('statTotal').textContent = total;
+// SITE
+function saveSite(){
+  localStorage.setItem('ie_site',JSON.stringify({title:document.getElementById('sT').value,desc:document.getElementById('sD').value,badge:document.getElementById('sB').value,email:document.getElementById('sE').value,tel:document.getElementById('sTel').value,end:document.getElementById('sEnd').value}));
+  notif('✅ Site salvo!');addLog('Site editado','admin','Textos atualizados');
+}
+function saveTer(){localStorage.setItem('ie_termos',document.getElementById('tE').innerHTML);notif('✅ Termos salvos!');addLog('Termos salvos','admin','');}
+function savePriv(){localStorage.setItem('ie_priv',document.getElementById('pE').innerHTML);notif('✅ Privacidade salva!');addLog('Privacidade salva','admin','');}
+function salvarTudo(){saveCart();saveSite();saveTer();savePriv();notif('✅ Tudo salvo!');}
 
-    const hoje = new Date().toDateString();
-    const semanaAtras = new Date(Date.now() - 7*24*60*60*1000);
-    let countHoje = 0, countSemana = 0;
-    dados.forEach(r => {
-      const d = new Date(r[5]);
-      if (d.toDateString() === hoje) countHoje++;
-      if (d >= semanaAtras) countSemana++;
-    });
-    document.getElementById('statHoje').textContent = countHoje;
-    document.getElementById('statSemana').textContent = countSemana;
+// LOGS
+function addLog(a,u,d){logs.unshift({ts:new Date().toLocaleString('pt-BR'),a,u,d});if(logs.length>100)logs.pop();localStorage.setItem('ie_logs',JSON.stringify(logs));renderLogs();}
+function renderLogs(){document.getElementById('logsTb').innerHTML=logs.length?logs.slice(0,50).map(l=>`<tr><td style="color:var(--mu);font-size:.78rem;white-space:nowrap">${l.ts}</td><td><span class="bdg bb">${l.a}</span></td><td style="color:var(--mu)">${l.u}</td><td style="color:var(--mu);font-size:.82rem">${l.d||'—'}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">Sem atividades.</td></tr>';}
 
-    // Última assinatura
-    if (dados.length > 0) {
-      const ultima = new Date(dados[dados.length-1][5]);
-      document.getElementById('statUltima').textContent = 'Última: ' + ultima.toLocaleDateString('pt-BR');
-    } else {
-      document.getElementById('statUltima').textContent = 'Nenhuma assinatura ainda';
-    }
+// NOTIF
+function notif(msg,err=false){const n=document.getElementById('notif');n.textContent=msg;n.className='notif on'+(err?' err':'');setTimeout(()=>n.className='notif',3500);}
 
-    // Áreas
-    const areaMap = {};
-    dados.forEach(r => {
-      const a = r[4] || 'Não informado';
-      areaMap[a] = (areaMap[a] || 0) + 1;
-    });
-    document.getElementById('statAreas').textContent = Object.keys(areaMap).length;
-
-    // Lista de áreas
-    const sorted = Object.entries(areaMap).sort((a,b) => b[1]-a[1]);
-    const maxVal = sorted[0]?.[1] || 1;
-    document.getElementById('areaList').innerHTML = sorted.map(([area, count]) => `
-      <li class="area-item">
-        <div style="flex:1">
-          <div style="display:flex;justify-content:space-between">
-            <span class="area-name">${area}</span>
-            <span class="area-count">${count}</span>
-          </div>
-          <div class="area-bar-wrap"><div class="area-bar" style="width:${(count/maxVal*100).toFixed(0)}%"></div></div>
-        </div>
-      </li>
-    `).join('') || '<li style="color:rgba(255,255,255,0.4);font-size:0.85rem;padding:1rem 0;text-align:center">Sem dados ainda</li>';
-
-    renderizarTabela(dados);
-  }
-
-  function renderizarTabela(dados) {
-    if (dados.length === 0) {
-      document.getElementById('tabelaBody').innerHTML = '<tr><td colspan="5" class="empty-state">📭 Nenhuma assinatura registrada ainda.</td></tr>';
-      return;
-    }
-    document.getElementById('tabelaBody').innerHTML = dados.map((r, i) => {
-      const data = r[5] ? new Date(r[5]).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
-      return `<tr>
-        <td style="color:rgba(255,255,255,0.3)">${dados.length - i}</td>
-        <td style="font-weight:500">${r[0] || '—'}</td>
-        <td style="color:rgba(255,255,255,0.6)">${r[1] || '—'}</td>
-        <td><span class="area-badge">${r[4] || '—'}</span></td>
-        <td style="color:rgba(255,255,255,0.5);font-size:0.82rem">${data}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  function filtrarTabela() {
-    const busca = document.getElementById('searchInput').value.toLowerCase();
-    const filtrado = todosOsDados.filter(r => (r[0]||'').toLowerCase().includes(busca) || (r[1]||'').toLowerCase().includes(busca) || (r[4]||'').toLowerCase().includes(busca));
-    renderizarTabela(filtrado);
-  }
-
-  function exportarCSV() {
-    if (todosOsDados.length === 0) { alert('Nenhum dado para exportar.'); return; }
-    const header = ['Nome','Email','CPF','Telefone','Area','Data'];
-    const rows = [header, ...todosOsDados];
-    const csv = rows.map(r => r.map(c => '"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
-    const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url;
-    a.download = 'assinaturas_integridade_'+new Date().toISOString().slice(0,10)+'.csv';
-    a.click(); URL.revokeObjectURL(url);
-  }
-
-  // Auto-atualizar a cada 60 segundos
-  setInterval(() => {
-    if (document.getElementById('dashboard').style.display === 'block') carregarDados();
-  }, 60000);
+// INIT
+const sv=localStorage.getItem('ie_termos');if(sv)document.getElementById('tE').innerHTML=sv;
+const sp=localStorage.getItem('ie_priv');if(sp)document.getElementById('pE').innerHTML=sp;
+setInterval(()=>{if(document.getElementById('app').style.display!=='none')loadData();},60000);
 </script>
 </body>
 </html>
