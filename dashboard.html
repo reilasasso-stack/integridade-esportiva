@@ -236,6 +236,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
             <option>Segurança</option><option>Torcida Organizada</option><option>Estudante</option><option>Outro</option>
           </select>
           <button class="bs" onclick="exportCSV()">⬇️ CSV</button>
+          <button class="bs" style="background:rgba(255,80,80,.15);border-color:rgba(255,80,80,.3);color:#ff8080;" onclick="limparDadosTeste()" title="Remove assinaturas salvas localmente">🗑️ Limpar local</button>
           <button class="bo" onclick="loadData()">🔄</button>
         </div>
         <div class="card">
@@ -391,7 +392,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <div style="background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:10px;padding:1.2rem">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><span style="font-size:.9rem;font-weight:500">🔒 Política de Privacidade</span><button class="bs" onclick="savePriv()">Salvar</button></div>
           <div class="etbar" style="border-radius:7px 7px 0 0"><button class="tb" onclick="ge('bold','pE')"><b>B</b></button><button class="tb" onclick="ge('italic','pE')"><i>I</i></button><button class="tb" onclick="geb('h2','pE')">H2</button></div>
-          <div class="ebox" id="pE" contenteditable="true"><h2>Política de Privacidade</h2><p>Esta política descreve como coletamos, usamos e protegemos seus dados pessoais.</p><h2>Dados Coletados</h2><p>Coletamos: nome completo, CPF, e-mail, telefone e área de atuação, para fins de identificação e pesquisa acadêmica.</p><h2>Base Legal</h2><p>O tratamento é realizado com base no consentimento explícito, conforme Art. 7º, inciso I da Lei nº 13.709/2018 (LGPD).</p><h2>Seus Direitos</h2><p>Você pode solicitar acesso, correção ou exclusão de seus dados pelo e-mail integridade@usp.br.</p></div>
+          <div class="ebox" id="pE" contenteditable="true"><h2>Política de Privacidade</h2><p>Esta política descreve como coletamos, usamos e protegemos seus dados pessoais.</p><h2>Dados Coletados</h2><p>Coletamos: nome completo, CPF, e-mail, telefone e área de atuação, para fins de identificação e pesquisa acadêmica.</p><h2>Base Legal</h2><p>O tratamento é realizado com base no consentimento explícito, conforme Art. 7º, inciso I da Lei nº 13.709/2018 (LGPD).</p><h2>Seus Direitos</h2><p>Você pode solicitar acesso, correção ou exclusão de seus dados pelo e-mail <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5d343329383a2f34393c39381d282e2d733f2f">[email&#160;protected]</a>.</p></div>
         </div>
       </div>
 
@@ -413,7 +414,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
 <div class="notif" id="notif"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const SHEET='https://script.google.com/macros/s/AKfycbzrSOeOCGwtagi-7Ofk5zQv04e2j6VgKaq-TYKT5gc4oh6CBSu7Gqch-LSXrZDOIvKN/exec';
 const CLAUDE='https://api.anthropic.com/v1/messages';
 const ADM_U='admin', ADM_P='integridade2024'; // ← Mude a senha aqui
@@ -456,11 +457,29 @@ function goPage(id){
 
 // DATA
 async function loadData(){
+  const local=JSON.parse(localStorage.getItem('ie_assinaturas')||'[]');
+  // Mostra dados locais imediatamente
+  users=local;
+  updateOv(); renderUsers(users);
+
+  // Tenta buscar do Google Sheets e mesclar
   try{
     const r=await fetch(SHEET+'?t='+Date.now());
-    users=(await r.json()).slice(1);
+    const d=await r.json();
+    const remote=d.slice(1).filter(r=>r&&r[0]); // remove header e linhas vazias
+
+    // Mescla: combina remotos e locais sem duplicatas (por email+nome)
+    const key=r=>((r[0]||'')+(r[1]||'')).toLowerCase().trim();
+    const remoteKeys=new Set(remote.map(key));
+    const localOnly=local.filter(r=>!remoteKeys.has(key(r)));
+    users=[...remote,...localOnly];
+
+    // Sincroniza locais que vieram do sheets de volta ao localStorage
+    localStorage.setItem('ie_assinaturas', JSON.stringify(users));
     updateOv(); renderUsers(users);
-  }catch(e){notif('Erro ao carregar dados.',true);}
+  }catch(e){
+    if(!local.length) notif('Sem conexão com o servidor. Exibindo dados locais.',true);
+  }
 }
 
 function updateOv(){
@@ -490,6 +509,14 @@ function exportCSV(){
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
   a.download='assinaturas_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
   addLog('Export CSV','admin',users.length+' registros');
+}
+function limparDadosTeste(){
+  if(!confirm('Remover todas as assinaturas salvas localmente?\n(Dados no Google Sheets não são afetados)')) return;
+  localStorage.removeItem('ie_assinaturas');
+  users=[];
+  updateOv(); renderUsers(users);
+  notif('Dados locais removidos.');
+  addLog('Limpeza local','admin','Assinaturas locais removidas');
 }
 
 // NOTÍCIAS
@@ -603,9 +630,4 @@ function renderLogs(){document.getElementById('logsTb').innerHTML=logs.length?lo
 function notif(msg,err=false){const n=document.getElementById('notif');n.textContent=msg;n.className='notif on'+(err?' err':'');setTimeout(()=>n.className='notif',3500);}
 
 // INIT
-const sv=localStorage.getItem('ie_termos');if(sv)document.getElementById('tE').innerHTML=sv;
-const sp=localStorage.getItem('ie_priv');if(sp)document.getElementById('pE').innerHTML=sp;
-setInterval(()=>{if(document.getElementById('app').style.display!=='none')loadData();},60000);
-</script>
-</body>
-</html>
+const sv=localStorage.getItem('ie_termos');if(sv)document.getElementById('tE
