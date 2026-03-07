@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Administrativo | Integridade Esportiva</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D1B2A; --navy2: #132337; --navy3: #1a2f45;
+    --green: #2D6A4F; --green-light: #40916C; --green-accent: #74C69D;
+    --red: #e74c3c; --yellow: #f39c12; --blue: #3498db;
+    --white: #FAFAF8; --text-muted: rgba(255,255,255,0.5);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--navy); color:white; min-height:100vh; }
+
+  /* LOGIN */
+  #loginScreen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(45,106,79,0.15) 0%, transparent 70%);
+  }
+  .login-box {
+    background:var(--navy2); border:1px solid rgba(116,198,157,0.2);
+    border-radius:20px; padding:3rem; width:100%; max-width:400px; text-align:center;
+  }
+  .login-box .icon { font-size:3rem; margin-bottom:1rem; }
+  .login-box h2 { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:0.5rem; }
+  .login-box p { color:var(--text-muted); font-size:0.9rem; margin-bottom:2rem; }
+  .login-input {
+    width:100%; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
+    border-radius:8px; color:white; padding:0.85rem 1rem; font-size:1rem;
+    font-family:'DM Sans',sans-serif; margin-bottom:1rem; text-align:center; letter-spacing:0.2em;
+  }
+  .login-input:focus { outline:none; border-color:var(--green-accent); }
+  .login-btn {
+    width:100%; background:var(--green); color:white; border:none;
+    padding:0.9rem; border-radius:8px; font-size:1rem; font-family:'DM Sans',sans-serif;
+    cursor:pointer; transition:background 0.2s;
+  }
+  .login-btn:hover { background:var(--green-light); }
+  .login-error { color:#e74c3c; font-size:0.85rem; margin-top:0.75rem; display:none; }
+
+  /* DASHBOARD */
+  #dashboard { display:none; }
+
+  /* TOPBAR */
+  .topbar {
+    background:var(--navy2); border-bottom:1px solid rgba(255,255,255,0.06);
+    padding:0 2rem; height:64px; display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:50;
+  }
+  .topbar-logo { font-family:'Playfair Display',serif; color:var(--green-accent); font-size:1.1rem; }
+  .topbar-logo span { color:white; }
+  .topbar-right { display:flex; align-items:center; gap:1rem; }
+  .badge-live { background:rgba(116,198,157,0.15); border:1px solid rgba(116,198,157,0.3); color:var(--green-accent); font-size:0.75rem; padding:0.3rem 0.75rem; border-radius:100px; display:flex; align-items:center; gap:0.4rem; }
+  .badge-live::before { content:'●'; font-size:0.5rem; animation:blink 1.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .logout-btn { background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.3); color:#e74c3c; padding:0.4rem 1rem; border-radius:6px; cursor:pointer; font-size:0.85rem; font-family:'DM Sans',sans-serif; transition:background 0.2s; }
+  .logout-btn:hover { background:rgba(231,76,60,0.25); }
+
+  /* MAIN */
+  .main { padding:2rem; max-width:1400px; margin:0 auto; }
+
+  /* STATS CARDS */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+  .stat-card {
+    background:var(--navy2); border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px; padding:1.5rem; position:relative; overflow:hidden;
+  }
+  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .stat-card.green::before { background:var(--green-accent); }
+  .stat-card.blue::before { background:var(--blue); }
+  .stat-card.yellow::before { background:var(--yellow); }
+  .stat-card.red::before { background:var(--red); }
+  .stat-label { color:var(--text-muted); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.5rem; }
+  .stat-value { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:white; line-height:1; }
+  .stat-sub { color:var(--text-muted); font-size:0.78rem; margin-top:0.4rem; }
+  .stat-icon { position:absolute; right:1.2rem; top:50%; transform:translateY(-50%); font-size:2rem; opacity:0.15; }
+
+  /* GRID LAYOUT */
+  .content-grid { display:grid; grid-template-columns:1fr 320px; gap:1.5rem; }
+
+  /* TABLE */
+  .panel { background:var(--navy2); border:1px solid rgba(255,255,255,0.06); border-radius:12px; overflow:hidden; }
+  .panel-header { padding:1.2rem 1.5rem; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; }
+  .panel-title { font-size:0.95rem; font-weight:500; }
+  .panel-actions { display:flex; gap:0.5rem; }
+  .search-input {
+    background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1);
+    border-radius:6px; color:white; padding:0.4rem 0.8rem; font-size:0.82rem;
+    font-family:'DM Sans',sans-serif; width:200px;
+  }
+  .search-input::placeholder { color:rgba(255,255,255,0.3); }
+  .search-input:focus { outline:none; border-color:var(--green-accent); }
+  .export-btn {
+    background:var(--green); color:white; border:none; padding:0.4rem 1rem;
+    border-radius:6px; font-size:0.82rem; font-family:'DM Sans',sans-serif;
+    cursor:pointer; transition:background 0.2s;
+  }
+  .export-btn:hover { background:var(--green-light); }
+
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th { padding:0.75rem 1rem; text-align:left; font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid rgba(255,255,255,0.06); white-space:nowrap; }
+  td { padding:0.85rem 1rem; font-size:0.88rem; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+  .area-badge { background:rgba(116,198,157,0.12); border:1px solid rgba(116,198,157,0.25); color:var(--green-accent); font-size:0.75rem; padding:0.25rem 0.6rem; border-radius:100px; white-space:nowrap; }
+  .empty-state { text-align:center; padding:3rem; color:var(--text-muted); font-size:0.9rem; }
+  .loading-state { text-align:center; padding:3rem; color:var(--text-muted); font-size:0.9rem; }
+
+  /* SIDEBAR */
+  .sidebar { display:flex; flex-direction:column; gap:1rem; }
+  .area-list { list-style:none; display:flex; flex-direction:column; gap:0.5rem; }
+  .area-item { display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+  .area-item:last-child { border-bottom:none; }
+  .area-name { font-size:0.85rem; color:rgba(255,255,255,0.7); }
+  .area-count { font-size:0.85rem; font-weight:500; color:var(--green-accent); }
+  .area-bar-wrap { height:4px; background:rgba(255,255,255,0.06); border-radius:4px; margin-top:0.3rem; overflow:hidden; }
+  .area-bar { height:100%; background:linear-gradient(90deg,var(--green),var(--green-accent)); border-radius:4px; }
+
+  /* REFRESH BTN */
+  .refresh-btn {
+    background:rgba(116,198,157,0.1); border:1px solid rgba(116,198,157,0.2);
+    color:var(--green-accent); padding:0.4rem 0.8rem; border-radius:6px;
+    font-size:0.78rem; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.2s;
+  }
+  .refresh-btn:hover { background:rgba(116,198,157,0.2); }
+
+  /* RESPONSIVE */
+  @media(max-width:900px) {
+    .stats-grid { grid-template-columns:1fr 1fr; }
+    .content-grid { grid-template-columns:1fr; }
+  }
+  @media(max-width:560px) {
+    .stats-grid { grid-template-columns:1fr; }
+    .main { padding:1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="icon">🔒</div>
+    <h2>Painel Administrativo</h2>
+    <p>Integridade Esportiva · USP<br>Digite a senha para acessar</p>
+    <input type="password" class="login-input" id="senhaInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrar()">
+    <button class="login-btn" onclick="entrar()">Entrar</button>
+    <div class="login-error" id="loginError">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-logo">Painel<span>Admin</span></div>
+    <div class="topbar-right">
+      <div class="badge-live">Dados em tempo real</div>
+      <button class="logout-btn" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card green">
+        <div class="stat-label">Total de assinaturas</div>
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-sub" id="statUltima">Carregando...</div>
+        <div class="stat-icon">✍️</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Áreas representadas</div>
+        <div class="stat-value" id="statAreas">—</div>
+        <div class="stat-sub">categorias profissionais</div>
+        <div class="stat-icon">👥</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Esta semana</div>
+        <div class="stat-value" id="statSemana">—</div>
+        <div class="stat-sub">novas adesões</div>
+        <div class="stat-icon">📅</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Hoje</div>
+        <div class="stat-value" id="statHoje">—</div>
+        <div class="stat-sub">assinaturas hoje</div>
+        <div class="stat-icon">⚡</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-grid">
+      <!-- TABLE -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">📋 Todas as Assinaturas</span>
+          <div class="panel-actions">
+            <input type="text" class="search-input" id="searchInput" placeholder="Buscar por nome..." oninput="filtrarTabela()">
+            <button class="refresh-btn" onclick="carregarDados()">🔄 Atualizar</button>
+            <button class="export-btn" onclick="exportarCSV()">⬇️ Exportar CSV</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Área</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaBody">
+              <tr><td colspan="5" class="loading-state">⏳ Carregando dados...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">📊 Por Área de Atuação</span></div>
+          <div style="padding:1rem 1.5rem">
+            <ul class="area-list" id="areaList">
+              <li style="color:rgba(255,255,255,0.4);font-size:0.85rem;padding:1rem 0;text-align:center">Carregando...</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🔗 Links Úteis</span></div>
+          <div style="padding:1rem 1.5rem;display:flex;flex-direction:column;gap:0.6rem">
+            <a href="index.html" style="color:var(--green-accent);font-size:0.85rem;text-decoration:none">← Voltar ao site</a>
+            <a href="https://docs.google.com/spreadsheets" target="_blank" style="color:var(--green-accent);font-size:0.85rem;text-decoration:none">📊 Abrir Google Sheets</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzrSOeOCGwtagi-7Ofk5zQv04e2j6VgKaq-TYKT5gc4oh6CBSu7Gqch-LSXrZDOIvKN/exec';
+  const SENHA = 'integridade2024'; // ← VOCÊ PODE MUDAR ESTA SENHA
+  let todosOsDados = [];
+
+  function entrar() {
+    const s = document.getElementById('senhaInput').value;
+    if (s === SENHA) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      carregarDados();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('senhaInput').value = '';
+    }
+  }
+
+  function sair() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('senhaInput').value = '';
+  }
+
+  async function carregarDados() {
+    document.getElementById('tabelaBody').innerHTML = '<tr><td colspan="5" class="loading-state">⏳ Carregando dados...</td></tr>';
+    try {
+      const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+      const data = await res.json();
+      todosOsDados = data.slice(1); // remover cabeçalho
+      atualizarDashboard(todosOsDados);
+    } catch(e) {
+      document.getElementById('tabelaBody').innerHTML = '<tr><td colspan="5" class="empty-state">❌ Erro ao carregar dados. Verifique a conexão.</td></tr>';
+    }
+  }
+
+  function atualizarDashboard(dados) {
+    // Stats
+    const total = dados.length;
+    document.getElementById('statTotal').textContent = total;
+
+    const hoje = new Date().toDateString();
+    const semanaAtras = new Date(Date.now() - 7*24*60*60*1000);
+    let countHoje = 0, countSemana = 0;
+    dados.forEach(r => {
+      const d = new Date(r[5]);
+      if (d.toDateString() === hoje) countHoje++;
+      if (d >= semanaAtras) countSemana++;
+    });
+    document.getElementById('statHoje').textContent = countHoje;
+    document.getElementById('statSemana').textContent = countSemana;
+
+    // Última assinatura
+    if (dados.length > 0) {
+      const ultima = new Date(dados[dados.length-1][5]);
+      document.getElementById('statUltima').textContent = 'Última: ' + ultima.toLocaleDateString('pt-BR');
+    } else {
+      document.getElementById('statUltima').textContent = 'Nenhuma assinatura ainda';
+    }
+
+    // Áreas
+    const areaMap = {};
+    dados.forEach(r => {
+      const a = r[4] || 'Não informado';
+      areaMap[a] = (areaMap[a] || 0) + 1;
+    });
+    document.getElementById('statAreas').textContent = Object.keys(areaMap).length;
+
+    // Lista de áreas
+    const sorted = Object.entries(areaMap).sort((a,b) => b[1]-a[1]);
+    const maxVal = sorted[0]?.[1] || 1;
+    document.getElementById('areaList').innerHTML = sorted.map(([area, count]) => `
+      <li class="area-item">
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between">
+            <span class="area-name">${area}</span>
+            <span class="area-count">${count}</span>
+          </div>
+          <div class="area-bar-wrap"><div class="area-bar" style="width:${(count/maxVal*100).toFixed(0)}%"></div></div>
+        </div>
+      </li>
+    `).join('') || '<li style="color:rgba(255,255,255,0.4);font-size:0.85rem;padding:1rem 0;text-align:center">Sem dados ainda</li>';
+
+    renderizarTabela(dados);
+  }
+
+  function renderizarTabela(dados) {
+    if (dados.length === 0) {
+      document.getElementById('tabelaBody').innerHTML = '<tr><td colspan="5" class="empty-state">📭 Nenhuma assinatura registrada ainda.</td></tr>';
+      return;
+    }
+    document.getElementById('tabelaBody').innerHTML = dados.map((r, i) => {
+      const data = r[5] ? new Date(r[5]).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+      return `<tr>
+        <td style="color:rgba(255,255,255,0.3)">${dados.length - i}</td>
+        <td style="font-weight:500">${r[0] || '—'}</td>
+        <td style="color:rgba(255,255,255,0.6)">${r[1] || '—'}</td>
+        <td><span class="area-badge">${r[4] || '—'}</span></td>
+        <td style="color:rgba(255,255,255,0.5);font-size:0.82rem">${data}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filtrarTabela() {
+    const busca = document.getElementById('searchInput').value.toLowerCase();
+    const filtrado = todosOsDados.filter(r => (r[0]||'').toLowerCase().includes(busca) || (r[1]||'').toLowerCase().includes(busca) || (r[4]||'').toLowerCase().includes(busca));
+    renderizarTabela(filtrado);
+  }
+
+  function exportarCSV() {
+    if (todosOsDados.length === 0) { alert('Nenhum dado para exportar.'); return; }
+    const header = ['Nome','Email','CPF','Telefone','Area','Data'];
+    const rows = [header, ...todosOsDados];
+    const csv = rows.map(r => r.map(c => '"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
+    const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    a.download = 'assinaturas_integridade_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click(); URL.revokeObjectURL(url);
+  }
+
+  // Auto-atualizar a cada 60 segundos
+  setInterval(() => {
+    if (document.getElementById('dashboard').style.display === 'block') carregarDados();
+  }, 60000);
+</script>
+</body>
+</html>
