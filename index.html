@@ -481,10 +481,12 @@ let cartilhaLida=false, cartilhaAceita=false;
 let identidadeVerificada=false;
 let codigoGerado='', modoVerificacao='', reenvioTimer=null;
 
-// EmailJS — inicializar com Public Key
-emailjs.init('VtcxI6DdtQhDm_2Lz');
+// EmailJS — inicializar após carregamento completo da página
 const EJS_SERVICE  = 'service_v1xi9le';
 const EJS_TEMPLATE = 'rxaixuj';
+window.addEventListener('load', function(){
+  if(typeof emailjs !== 'undefined') emailjs.init('VtcxI6DdtQhDm_2Lz');
+});
 
 // Atualizar ano do copyright dinamicamente
 document.getElementById('footerYear').textContent='© '+new Date().getFullYear()+' Integridade Esportiva · USP. Todos os direitos reservados.';
