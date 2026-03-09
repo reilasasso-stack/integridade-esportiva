@@ -6,6 +6,7 @@
 <title>Integridade no Esporte | USP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root{--navy:#0D1B2A;--navy2:#132337;--green:#2D6A4F;--gl:#40916C;--ga:#74C69D;--sand:#F5ECD7;--white:#FAFAF8;--muted:#5a6a7a;}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -480,6 +481,11 @@ let cartilhaLida=false, cartilhaAceita=false;
 let identidadeVerificada=false;
 let codigoGerado='', modoVerificacao='', reenvioTimer=null;
 
+// EmailJS — inicializar com Public Key
+emailjs.init('VtcxI6DdtQhDm_2Lz');
+const EJS_SERVICE  = 'service_v1xi9le';
+const EJS_TEMPLATE = 'rxaixuj';
+
 // Atualizar ano do copyright dinamicamente
 document.getElementById('footerYear').textContent='© '+new Date().getFullYear()+' Integridade Esportiva · USP. Todos os direitos reservados.';
 
@@ -633,11 +639,20 @@ function solicitarCodigo(modo){
 
   const hint=document.getElementById('codigoHint');
   if(modo==='email'){
-    hint.textContent=`Código enviado para ${email}. Verifique sua caixa de entrada.`;
-    // TODO produção: chamar backend/API de envio de e-mail com o codigoGerado
+    hint.textContent=`Enviando código para ${email}…`;
+    emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+      to_email: email,
+      passcode: codigoGerado,
+      time: new Date(Date.now() + 15*60000).toLocaleTimeString('pt-BR')
+    }).then(()=>{
+      hint.textContent=`Código enviado para ${email}. Verifique sua caixa de entrada.`;
+    }).catch(()=>{
+      hint.textContent=`Erro ao enviar o e-mail. Verifique o endereço e tente novamente.`;
+    });
   } else {
-    hint.textContent=`Código enviado por SMS para ${tel}.`;
-    // TODO produção: chamar backend/API de envio de SMS com o codigoGerado
+    hint.textContent=`Verificação por SMS não disponível no momento. Por favor, use o e-mail.`;
+    modoVerificacao='';
+    return;
   }
 
   // Estilo dos botões de seleção
