@@ -642,6 +642,10 @@ function solicitarCodigo(modo){
   const hint=document.getElementById('codigoHint');
   if(modo==='email'){
     hint.textContent=`Enviando código para ${email}…`;
+    if(typeof emailjs === 'undefined'){
+      hint.textContent=`Serviço de e-mail indisponível. Recarregue a página e tente novamente.`;
+      return;
+    }
     emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
       to_email: email,
       passcode: codigoGerado,
