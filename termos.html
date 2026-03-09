@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Termos de Uso & Privacidade | Integridade Esportiva</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{--navy:#0D1B2A;--navy2:#132337;--green:#2D6A4F;--gl:#40916C;--ga:#74C69D;--sand:#F5ECD7;--white:#FAFAF8;--muted:#5a6a7a;}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -21,9 +22,10 @@ nav{background:var(--navy);padding:1rem 5vw;display:flex;align-items:center;just
 .hero p{color:rgba(255,255,255,.55);font-size:.95rem;max-width:500px;margin:0 auto;}
 /* TABS */
 .tab-nav{background:var(--navy2);border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:center;gap:0;position:sticky;top:0;z-index:50;}
-.tnav{padding:1rem 2rem;cursor:pointer;font-size:.9rem;color:rgba(255,255,255,.5);border-bottom:2px solid transparent;transition:all .2s;}
+.tnav{padding:1rem 2rem;cursor:pointer;font-size:.9rem;color:rgba(255,255,255,.5);border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;}
 .tnav:hover{color:white;}
-.tnav.on{color:var(--ga);border-bottom-color:var(--ga);}
+.tnav:focus-visible{outline:2px solid var(--ga);outline-offset:2px;}
+.tnav.on{color:var(--ga);border-bottom-color:var(--ga);font-weight:500;}
 /* CONTENT */
 .wrap{max-width:820px;margin:0 auto;padding:4rem 5vw;}
 .section-block{display:none;}
@@ -76,17 +78,17 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;}
   <p>Transparência total sobre como usamos seus dados e quais são seus direitos.</p>
 </div>
 
-<div class="tab-nav">
-  <div class="tnav on" onclick="showTab('termos',this)">📄 Termos de Uso</div>
-  <div class="tnav" onclick="showTab('privacidade',this)" id="tab-privacidade">🔒 Privacidade</div>
-  <div class="tnav" onclick="showTab('cookies',this)">🍪 Cookies</div>
-  <div class="tnav" onclick="showTab('lgpd',this)">⚖️ LGPD</div>
-</div>
+<nav class="tab-nav" role="tablist" aria-label="Seções dos documentos legais">
+  <button class="tnav on" role="tab" aria-selected="true" aria-controls="sec-termos" id="tab-termos" onclick="showTab('termos',this)"><span aria-hidden="true">📄</span> Termos de Uso</button>
+  <button class="tnav" role="tab" aria-selected="false" aria-controls="sec-privacidade" id="tab-privacidade" onclick="showTab('privacidade',this)"><span aria-hidden="true">🔒</span> Privacidade</button>
+  <button class="tnav" role="tab" aria-selected="false" aria-controls="sec-cookies" id="tab-cookies" onclick="showTab('cookies',this)"><span aria-hidden="true">🍪</span> Cookies</button>
+  <button class="tnav" role="tab" aria-selected="false" aria-controls="sec-lgpd" id="tab-lgpd" onclick="showTab('lgpd',this)"><span aria-hidden="true">⚖️</span> LGPD</button>
+</nav>
 
 <div class="wrap">
 
   <!-- TERMOS -->
-  <div class="section-block on" id="sec-termos">
+  <div class="section-block on" id="sec-termos" role="tabpanel" aria-labelledby="tab-termos" tabindex="0">
     <div class="doc-header">
       <h2>Termos de Uso</h2>
       <p>Última atualização: Janeiro de 2024 · Versão 1.0</p>
@@ -119,7 +121,7 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;}
   </div>
 
   <!-- PRIVACIDADE -->
-  <div class="section-block" id="sec-privacidade">
+  <div class="section-block" id="sec-privacidade" role="tabpanel" aria-labelledby="tab-privacidade" tabindex="0">
     <div class="doc-header">
       <h2>Política de Privacidade</h2>
       <p>Última atualização: Janeiro de 2024 · Em conformidade com a LGPD (Lei nº 13.709/2018)</p>
@@ -160,7 +162,7 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;}
   </div>
 
   <!-- COOKIES -->
-  <div class="section-block" id="sec-cookies">
+  <div class="section-block" id="sec-cookies" role="tabpanel" aria-labelledby="tab-cookies" tabindex="0">
     <div class="doc-header">
       <h2>Política de Cookies</h2>
       <p>Gerenciar suas preferências de cookies abaixo.</p>
@@ -184,12 +186,14 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;}
           <label class="toggle"><input type="checkbox" id="ckAnalyt"><span class="tslider"></span></label>
         </div>
       </div>
-      <button onclick="salvarCookies()" style="background:var(--green);color:white;border:none;padding:.75rem 2rem;border-radius:8px;font-size:.9rem;font-family:'DM Sans',sans-serif;cursor:pointer;">Salvar preferências</button>
+      <button onclick="salvarCookies()" style="background:var(--green);color:white;border:none;padding:.75rem 2rem;border-radius:8px;font-size:.9rem;font-family:'DM Sans',sans-serif;cursor:pointer;" type="button">Salvar preferências</button>
+      <!-- Notificação inline de sucesso -->
+      <div id="cookieToast" role="status" aria-live="polite" style="display:none;margin-top:1rem;color:var(--green);font-size:.9rem;font-weight:500">✅ Preferências salvas com sucesso!</div>
     </div>
   </div>
 
   <!-- LGPD -->
-  <div class="section-block" id="sec-lgpd">
+  <div class="section-block" id="sec-lgpd" role="tabpanel" aria-labelledby="tab-lgpd" tabindex="0">
     <div class="doc-header">
       <h2>Seus Direitos (LGPD)</h2>
       <p>Lei Geral de Proteção de Dados — Lei nº 13.709/2018</p>
@@ -208,7 +212,7 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;}
       <h2>Como Exercer seus Direitos</h2>
       <p>Envie um e-mail para <strong>integridade@usp.br</strong> com o assunto "LGPD – [seu direito]". Responderemos em até <strong>15 dias úteis</strong>.</p>
       <h2>Autoridade Nacional</h2>
-      <p>Você também pode contatar a <strong>Autoridade Nacional de Proteção de Dados (ANPD)</strong> em: <strong>gov.br/anpd</strong></p>
+      <p>Você também pode contatar a <strong>Autoridade Nacional de Proteção de Dados (ANPD)</strong> em: <a href="https://www.gov.br/anpd" target="_blank" rel="noopener noreferrer" style="color:var(--green);font-weight:500">www.gov.br/anpd</a></p>
       <div style="background:rgba(45,106,79,.06);border-radius:10px;padding:1.5rem;margin-top:2rem;text-align:center">
         <p style="font-size:.9rem;color:var(--navy);font-weight:500;margin-bottom:.5rem">Solicitar exclusão dos meus dados</p>
         <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Envie um e-mail com seu nome completo e CPF para exercer este direito.</p>
@@ -225,29 +229,83 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;}
 </footer>
 
 <script>
+// Sanitização de HTML — remove tags e atributos perigosos mantendo formatação
+function sanitizeHtml(html){
+  try{
+    const doc=new DOMParser().parseFromString(String(html||''),'text/html');
+    ['script','iframe','object','embed','form','input','button','link','meta','base'].forEach(tag=>
+      doc.querySelectorAll(tag).forEach(el=>el.remove())
+    );
+    doc.querySelectorAll('*').forEach(el=>{
+      [...el.attributes].forEach(attr=>{
+        const n=attr.name.toLowerCase();
+        if(n.startsWith('on')||(n==='href'&&/^javascript:/i.test(attr.value))){
+          el.removeAttribute(attr.name);
+        }
+      });
+    });
+    return doc.body.innerHTML;
+  }catch(e){
+    return String(html||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+}
+
 function showTab(id,el){
-  document.querySelectorAll('.tnav').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tnav').forEach(t=>{t.classList.remove('on');t.setAttribute('aria-selected','false');});
   document.querySelectorAll('.section-block').forEach(s=>s.classList.remove('on'));
   el.classList.add('on');
+  el.setAttribute('aria-selected','true');
   document.getElementById('sec-'+id).classList.add('on');
-  // Carregar conteúdo editado pelo admin
-  if(id==='termos'){const s=localStorage.getItem('ie_termos');if(s)document.getElementById('termosContent').innerHTML=s;}
-  if(id==='privacidade'){const s=localStorage.getItem('ie_priv');if(s)document.getElementById('privContent').innerHTML=s;}
+  // Atualizar hash da URL sem saltar a página
+  history.replaceState(null,'','#'+id);
+  // Carregar conteúdo do admin com sanitização para prevenir XSS
+  if(id==='termos'){
+    const s=localStorage.getItem('ie_termos');
+    if(s)document.getElementById('termosContent').innerHTML=sanitizeHtml(s);
+  }
+  if(id==='privacidade'){
+    const s=localStorage.getItem('ie_priv');
+    if(s)document.getElementById('privContent').innerHTML=sanitizeHtml(s);
+  }
 }
+
 function salvarCookies(){
   const pref=document.getElementById('ckPref').checked;
   const anlt=document.getElementById('ckAnalyt').checked;
   localStorage.setItem('ck_pref',pref?'1':'0');
   localStorage.setItem('ck_anlt',anlt?'1':'0');
-  alert('Preferências de cookies salvas com sucesso!');
+  // Substituir alert() por notificação inline acessível
+  const toast=document.getElementById('cookieToast');
+  if(toast){
+    toast.style.display='block';
+    setTimeout(()=>{toast.style.display='none';},3500);
+  }
 }
-// Verificar se veio da âncora privacidade
-if(location.hash==='#privacidade'){
-  document.querySelectorAll('.tnav')[1].click();
+
+// Função para navegar para aba via hash
+function navToHash(){
+  const hash=location.hash.replace('#','');
+  const tabs={termos:'tab-termos',privacidade:'tab-privacidade',cookies:'tab-cookies',lgpd:'tab-lgpd'};
+  if(hash&&tabs[hash]){
+    const btn=document.getElementById(tabs[hash]);
+    if(btn)showTab(hash,btn);
+  }
 }
-// Carregar conteúdo inicial
-const initTermos=localStorage.getItem('ie_termos');
-if(initTermos)document.getElementById('termosContent').innerHTML=initTermos;
+
+// Reagir a mudanças do hash (ex: usuário clica em link direto)
+window.addEventListener('hashchange',navToHash);
+
+// Inicializar — verificar hash da URL e carregar conteúdo do admin
+document.addEventListener('DOMContentLoaded',function(){
+  // Carregar conteúdo inicial da aba de termos
+  const initTermos=localStorage.getItem('ie_termos');
+  if(initTermos)document.getElementById('termosContent').innerHTML=sanitizeHtml(initTermos);
+  // Navegar para aba correta se houver hash
+  navToHash();
+  // Atualizar copyright
+  const yrEl=document.querySelector('footer p');
+  if(yrEl)yrEl.textContent='© '+new Date().getFullYear()+' Integridade Esportiva · USP. Todos os direitos reservados.';
+});
 </script>
 </body>
 </html>

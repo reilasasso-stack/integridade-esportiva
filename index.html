@@ -19,7 +19,7 @@ nav{position:fixed;top:0;width:100%;z-index:200;background:rgba(13,27,42,.96);ba
 .nlinks a{color:rgba(255,255,255,.7);text-decoration:none;font-size:.88rem;text-transform:uppercase;letter-spacing:.04em;transition:color .2s;}
 .nlinks a:hover{color:var(--ga);}
 .ncta{background:var(--green);color:white!important;padding:.45rem 1.1rem;border-radius:4px;}
-.burger{display:none;flex-direction:column;gap:5px;cursor:pointer;}
+.burger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;}
 .burger span{width:24px;height:2px;background:white;border-radius:2px;}
 /* HERO */
 #hero{min-height:100vh;background:var(--navy);display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:100px 5vw 60px;position:relative;overflow:hidden;}
@@ -101,7 +101,7 @@ h2{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,3.5vw,2.8rem);fon
 .agree-check label{color:rgba(255,255,255,.75);font-size:.9rem;line-height:1.6;cursor:pointer;}
 /* COMPROMISSO */
 #compromisso{background:var(--sand);}
-.steps{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap;}
+.steps{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:2rem;flex-wrap:wrap;list-style:none;padding:0;}
 .step{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--muted);}
 .step-num{width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:600;}
 .step.active .step-num{background:var(--green);color:white;}
@@ -196,9 +196,9 @@ footer{background:var(--navy);padding:60px 5vw 30px;border-top:1px solid rgba(25
     <li><a href="#publico">Público</a></li>
     <li><a href="#compromisso" class="ncta">Assinar Compromisso</a></li>
   </ul>
-  <div class="burger" id="burger" onclick="document.getElementById('navLinks').classList.toggle('open')">
+  <button class="burger" id="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks" onclick="toggleMenu(this)">
     <span></span><span></span><span></span>
-  </div>
+  </button>
 </nav>
 
 <!-- HERO -->
@@ -334,31 +334,31 @@ footer{background:var(--navy);padding:60px 5vw 30px;border-top:1px solid rgba(25
   </div>
 
   <!-- STEPS -->
-  <div class="steps reveal" style="margin-top:2rem">
-    <div class="step active" id="st1"><div class="step-num">1</div><span>Ler cartilha</span></div>
-    <div class="step-arrow">›</div>
-    <div class="step" id="st2"><div class="step-num">2</div><span>Concordar</span></div>
-    <div class="step-arrow">›</div>
-    <div class="step" id="st3"><div class="step-num">3</div><span>Cadastro</span></div>
-    <div class="step-arrow">›</div>
-    <div class="step" id="st4"><div class="step-num">4</div><span>Assinar</span></div>
-  </div>
+  <ol class="steps reveal" style="margin-top:2rem" aria-label="Etapas para assinatura">
+    <li class="step active" id="st1" aria-current="step"><div class="step-num" aria-hidden="true">1</div><span>Ler cartilha</span></li>
+    <li class="step-arrow" aria-hidden="true">›</li>
+    <li class="step" id="st2"><div class="step-num" aria-hidden="true">2</div><span>Concordar</span></li>
+    <li class="step-arrow" aria-hidden="true">›</li>
+    <li class="step" id="st3"><div class="step-num" aria-hidden="true">3</div><span>Cadastro</span></li>
+    <li class="step-arrow" aria-hidden="true">›</li>
+    <li class="step" id="st4"><div class="step-num" aria-hidden="true">4</div><span>Assinar</span></li>
+  </ol>
 
   <div id="formBlock" style="display:none">
     <div class="fwrap reveal">
       <h3>Formulário de Adesão</h3>
       <p class="sub">Preencha os dados abaixo para assinar o compromisso de integridade.</p>
       <div class="frow2">
-        <div class="fg2"><label>Nome completo *</label><input type="text" id="fNome" placeholder="Seu nome completo"></div>
-        <div class="fg2"><label>CPF *</label><input type="text" id="fCpf" placeholder="000.000.000-00" maxlength="14"></div>
+        <div class="fg2"><label for="fNome">Nome completo *</label><input type="text" id="fNome" name="nome" placeholder="Seu nome completo" required autocomplete="name" aria-required="true"></div>
+        <div class="fg2"><label for="fCpf">CPF *</label><input type="text" id="fCpf" name="cpf" placeholder="000.000.000-00" maxlength="14" required aria-required="true" inputmode="numeric"></div>
       </div>
       <div class="frow2">
-        <div class="fg2"><label>E-mail *</label><input type="email" id="fEmail" placeholder="seu@email.com"></div>
-        <div class="fg2"><label>Telefone *</label><input type="tel" id="fTel" placeholder="(00) 00000-0000"></div>
+        <div class="fg2"><label for="fEmail">E-mail *</label><input type="email" id="fEmail" name="email" placeholder="seu@email.com" required aria-required="true" autocomplete="email"></div>
+        <div class="fg2"><label for="fTel">Telefone *</label><input type="tel" id="fTel" name="tel" placeholder="(00) 00000-0000" required aria-required="true" autocomplete="tel"></div>
       </div>
-      <div class="fg2"><label>Endereço *</label><input type="text" id="fEnd" placeholder="Rua, número, cidade – UF"></div>
-      <div class="fg2"><label>Área de atuação *</label>
-        <select id="fArea">
+      <div class="fg2"><label for="fEnd">Endereço *</label><input type="text" id="fEnd" name="endereco" placeholder="Rua, número, cidade – UF" required aria-required="true" autocomplete="street-address"></div>
+      <div class="fg2"><label for="fArea">Área de atuação *</label>
+        <select id="fArea" name="area" required aria-required="true">
           <option value="">Selecione sua área</option>
           <option value="Árbitro(a)">Árbitro(a)</option>
           <option value="Jogador(a)">Jogador(a)</option>
@@ -395,11 +395,11 @@ footer{background:var(--navy);padding:60px 5vw 30px;border-top:1px solid rgba(25
       </div>
 
       <div class="ck">
-        <input type="checkbox" id="ckTermos">
-        <label for="ckTermos">Li e aceito os <a href="termos.html" target="_blank">Termos de Uso</a> e a <a href="termos.html#privacidade" target="_blank">Política de Privacidade</a>.</label>
+        <input type="checkbox" id="ckTermos" required aria-required="true">
+        <label for="ckTermos">Li e aceito os <a href="termos.html" target="_blank" rel="noopener noreferrer">Termos de Uso</a> e a <a href="termos.html#privacidade" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.</label>
       </div>
       <div class="ck">
-        <input type="checkbox" id="ckLgpd">
+        <input type="checkbox" id="ckLgpd" required aria-required="true">
         <label for="ckLgpd">Autorizo o armazenamento dos meus dados pessoais para fins de pesquisa acadêmica, conforme a <strong>LGPD</strong>.</label>
       </div>
       <button class="bsub" id="btnEnv" onclick="enviarForm()">✍️ Assinar o Compromisso de Integridade</button>
@@ -446,11 +446,11 @@ footer{background:var(--navy);padding:60px 5vw 30px;border-top:1px solid rgba(25
   <div class="ftop">
     <div class="fbrand"><div class="flogo">IntegridadeEsportiva</div><p>Uma iniciativa educativa da USP para promover ética, transparência e integridade no esporte brasileiro.</p></div>
     <div class="fcol"><h5>Navegação</h5><ul><li><a href="#metas">Sobre o Projeto</a></li><li><a href="#cartilha">Cartilha</a></li><li><a href="#noticias">Notícias</a></li><li><a href="#compromisso">Assinar</a></li></ul></div>
-    <div class="fcol"><h5>Recursos</h5><ul><li><a href="#" onclick="abrirCartilha()">Cartilha Completa</a></li><li><a href="termos.html">Termos de Uso</a></li><li><a href="termos.html#privacidade">Privacidade</a></li><li><a href="#">Canal de Denúncia</a></li></ul></div>
-    <div class="fcol"><h5>Contato</h5><ul><li><a href="#" id="footerEmail">integridade@usp.br</a></li><li><a href="#" id="footerTel">(11) 3091-0000</a></li><li><a href="#" id="footerEnd">USP — São Paulo, SP</a></li><li><a href="dashboard.html">🔒 Painel Admin</a></li></ul></div>
+    <div class="fcol"><h5>Recursos</h5><ul><li><a href="#cartilha-completa" onclick="abrirCartilha();return false;">Cartilha Completa</a></li><li><a href="termos.html">Termos de Uso</a></li><li><a href="termos.html#privacidade">Privacidade</a></li><li><a href="https://www.gov.br/esporte/pt-br" target="_blank" rel="noopener noreferrer">Canal de Denúncia</a></li></ul></div>
+    <div class="fcol"><h5>Contato</h5><ul><li><a href="mailto:integridade@usp.br" id="footerEmail">integridade@usp.br</a></li><li><a href="tel:+551130910000" id="footerTel">(11) 3091-0000</a></li><li><span id="footerEnd" style="color:rgba(255,255,255,.4);font-size:.88rem">USP — São Paulo, SP</span></li><li><a href="dashboard.html">🔒 Painel Admin</a></li></ul></div>
   </div>
   <div class="fbot">
-    <span>© 2024 Integridade Esportiva · USP. Todos os direitos reservados.</span>
+    <span id="footerYear">© 2024 Integridade Esportiva · USP. Todos os direitos reservados.</span>
     <span class="lgpdb">🔒 Dados protegidos · LGPD</span>
   </div>
 </footer>
@@ -479,6 +479,46 @@ const SHEET='https://script.google.com/macros/s/AKfycbzrSOeOCGwtagi-7Ofk5zQv04e2
 let cartilhaLida=false, cartilhaAceita=false;
 let identidadeVerificada=false;
 let codigoGerado='', modoVerificacao='', reenvioTimer=null;
+
+// Atualizar ano do copyright dinamicamente
+document.getElementById('footerYear').textContent='© '+new Date().getFullYear()+' Integridade Esportiva · USP. Todos os direitos reservados.';
+
+// Funções de segurança: escapar HTML e sanitizar conteúdo admin
+function escapeHtml(str){
+  return String(str||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+function sanitizeHtml(html){
+  // Usa DOMParser para remover tags/atributos perigosos mantendo formatação básica
+  try{
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    const dangerous=['script','iframe','object','embed','form','input','button','link','meta','base'];
+    dangerous.forEach(tag=>doc.querySelectorAll(tag).forEach(el=>el.remove()));
+    doc.querySelectorAll('*').forEach(el=>{
+      [...el.attributes].forEach(attr=>{
+        const name=attr.name.toLowerCase();
+        if(name.startsWith('on')||
+           (name==='href'&&/^javascript:/i.test(attr.value))||
+           (name==='src'&&/^javascript:/i.test(attr.value))||
+           name==='formaction'||name==='action'||name==='xlink:href'){
+          el.removeAttribute(attr.name);
+        }
+      });
+    });
+    return doc.body.innerHTML;
+  }catch(e){return escapeHtml(html);}
+}
+
+// Menu mobile
+function toggleMenu(btn){
+  const nav=document.getElementById('navLinks');
+  const open=nav.classList.toggle('open');
+  btn.setAttribute('aria-expanded',open);
+}
 
 // LGPD
 function aceitarLgpd(){
@@ -522,7 +562,26 @@ function abrirCartilha(){
   const sec=document.getElementById('cartilha-completa');
   sec.style.display='block';
   const cart=getCartContent();
-  document.getElementById('cartContent').innerHTML=cart.map(s=>`<div class="cart-section"><h3><span style="color:var(--ga);font-family:'Playfair Display',serif;margin-right:.5rem">0${s.id}.</span>${s.titulo}</h3><p>${typeof s.txt==='string'?s.txt.replace(/<[^>]*>/g,''):s.txt}</p></div>`).join('');
+  // Usar criação DOM segura para evitar XSS
+  const container=document.getElementById('cartContent');
+  container.innerHTML='';
+  cart.forEach(s=>{
+    const div=document.createElement('div');
+    div.className='cart-section';
+    const h3=document.createElement('h3');
+    const num=document.createElement('span');
+    num.style.cssText="color:var(--ga);font-family:'Playfair Display',serif;margin-right:.5rem";
+    num.setAttribute('aria-hidden','true');
+    num.textContent='0'+s.id+'.';
+    h3.appendChild(num);
+    h3.appendChild(document.createTextNode(String(s.titulo||'')));
+    const p=document.createElement('p');
+    // O conteúdo da cartilha vem do admin — sanitizar HTML mas manter formatação
+    p.innerHTML=sanitizeHtml(String(s.txt||''));
+    div.appendChild(h3);
+    div.appendChild(p);
+    container.appendChild(div);
+  });
   cartilhaLida=true;
   document.getElementById('st1').classList.add('active');
   document.getElementById('st2').classList.add('active');
@@ -575,11 +634,10 @@ function solicitarCodigo(modo){
   const hint=document.getElementById('codigoHint');
   if(modo==='email'){
     hint.textContent=`Código enviado para ${email}. Verifique sua caixa de entrada.`;
-    // Simula envio (em produção: chamar backend/API de envio)
-    console.log('[DEV] Código e-mail:', codigoGerado);
+    // TODO produção: chamar backend/API de envio de e-mail com o codigoGerado
   } else {
     hint.textContent=`Código enviado por SMS para ${tel}.`;
-    console.log('[DEV] Código SMS:', codigoGerado);
+    // TODO produção: chamar backend/API de envio de SMS com o codigoGerado
   }
 
   // Estilo dos botões de seleção
@@ -649,7 +707,27 @@ document.addEventListener('DOMContentLoaded',function(){
   });
 });
 
+// Validação de e-mail com regex
+function validarEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+// Validação de CPF com dígito verificador
+function validarCPF(cpf){
+  const nums=cpf.replace(/\D/g,'');
+  if(nums.length!==11||/^(\d)\1{10}$/.test(nums))return false;
+  let s=0;
+  for(let i=0;i<9;i++)s+=parseInt(nums[i])*(10-i);
+  let r=(s*10)%11;if(r===10||r===11)r=0;
+  if(r!==parseInt(nums[9]))return false;
+  s=0;
+  for(let i=0;i<10;i++)s+=parseInt(nums[i])*(11-i);
+  r=(s*10)%11;if(r===10||r===11)r=0;
+  return r===parseInt(nums[10]);
+}
+
+let envioEmAndamento=false;
 async function enviarForm(){
+  if(envioEmAndamento)return;
   if(!cartilhaAceita){alert('Por favor, leia e concorde com a cartilha primeiro.');abrirCartilha();return;}
   const nome=document.getElementById('fNome').value.trim();
   const cpf=document.getElementById('fCpf').value.trim();
@@ -660,9 +738,12 @@ async function enviarForm(){
   const termos=document.getElementById('ckTermos').checked;
   const lgpd=document.getElementById('ckLgpd').checked;
   if(!nome||!cpf||!email||!tel||!end||!area){alert('Preencha todos os campos obrigatórios (*).');return;}
+  if(!validarEmail(email)){alert('Informe um e-mail válido.');document.getElementById('fEmail').focus();return;}
+  if(!validarCPF(cpf)){alert('CPF inválido. Verifique o número informado.');document.getElementById('fCpf').focus();return;}
   if(!termos||!lgpd){alert('Você precisa aceitar os termos e a política de privacidade.');return;}
   if(!identidadeVerificada){alert('Por favor, verifique sua identidade com o código enviado por e-mail ou SMS.');document.getElementById('verificacaoBox').scrollIntoView({behavior:'smooth'});return;}
   const btn=document.getElementById('btnEnv');
+  envioEmAndamento=true;
   btn.disabled=true;btn.textContent='⏳ Enviando...';
   try{
     await fetch(SHEET,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,cpf,email,telefone:tel,endereco:end,area})});
@@ -674,6 +755,7 @@ async function enviarForm(){
     document.getElementById('modalOk').classList.add('open');
     setTimeout(loadCount,2000);
   }catch(e){alert('Erro ao enviar. Tente novamente.');}
+  envioEmAndamento=false;
   btn.disabled=false;btn.textContent='✍️ Assinar o Compromisso de Integridade';
 }
 
@@ -685,23 +767,52 @@ function loadPublishedNews(){
     const nots=JSON.parse(saved);
     if(!nots.length)return;
     const colors=['linear-gradient(135deg,#0D1B2A,#2D6A4F)','linear-gradient(135deg,#1a2f45,#40916C)','linear-gradient(135deg,#132337,#2D6A4F)'];
-    const newCards=nots.slice(0,3).map((n,i)=>`<div class="ncard reveal"><div class="nimg" style="background:${colors[i%3]}">${['📰','🔍','⚽','⚖️','🎓'][i%5]}</div><div class="nbody"><div class="ntag2">${n.categoria}</div><h3>${n.titulo}</h3><p>${n.resumo}</p><div class="ndate">📅 ${n.data} · ${n.origem}</div></div></div>`).join('');
-    if(newCards)document.getElementById('noticiasList').innerHTML=newCards+document.getElementById('noticiasList').innerHTML;
+    const icons=['📰','🔍','⚽','⚖️','🎓'];
+    // Usar escapeHtml em todos os campos vindos de localStorage
+    const newCards=nots.slice(0,3).map((n,i)=>`<div class="ncard reveal"><div class="nimg" style="background:${colors[i%3]}" aria-hidden="true">${icons[i%5]}</div><div class="nbody"><div class="ntag2">${escapeHtml(n.categoria)}</div><h3>${escapeHtml(n.titulo)}</h3><p>${escapeHtml(n.resumo)}</p><div class="ndate">📅 ${escapeHtml(n.data)} · ${escapeHtml(n.origem)}</div></div></div>`).join('');
+    if(newCards){
+      const list=document.getElementById('noticiasList');
+      const tempDiv=document.createElement('div');
+      tempDiv.innerHTML=newCards;
+      list.prepend(...tempDiv.childNodes);
+    }
   }catch(e){}
 }
 loadPublishedNews();
 
-// Carregar config do site
+// Carregar config do site — usando DOM seguro (sem innerHTML para dados do usuário)
 function loadSiteConfig(){
   const c=localStorage.getItem('ie_site');if(!c)return;
   try{
     const cfg=JSON.parse(c);
-    if(cfg.title&&document.getElementById('heroTitle'))document.getElementById('heroTitle').innerHTML=cfg.title.replace('começa com você.','<em>começa com você.</em>');
-    if(cfg.desc)document.getElementById('heroDesc').textContent=cfg.desc;
-    if(cfg.badge)document.getElementById('heroBadge').textContent=cfg.badge;
-    if(cfg.email)document.getElementById('footerEmail').textContent=cfg.email;
-    if(cfg.tel)document.getElementById('footerTel').textContent=cfg.tel;
-    if(cfg.end)document.getElementById('footerEnd').textContent=cfg.end;
+    if(cfg.title){
+      const el=document.getElementById('heroTitle');
+      if(el){
+        el.textContent='';
+        // Reconstrói o título com <em> de forma segura
+        const match=cfg.title.match(/^(.*?)(começa com você\.)(.*)$/s);
+        if(match){
+          if(match[1])el.appendChild(document.createTextNode(match[1]));
+          const em=document.createElement('em');
+          em.textContent=match[2];
+          el.appendChild(em);
+          if(match[3])el.appendChild(document.createTextNode(match[3]));
+        }else{
+          el.textContent=cfg.title;
+        }
+      }
+    }
+    if(cfg.desc){const el=document.getElementById('heroDesc');if(el)el.textContent=cfg.desc;}
+    if(cfg.badge){const el=document.getElementById('heroBadge');if(el)el.textContent=cfg.badge;}
+    if(cfg.email){
+      const el=document.getElementById('footerEmail');
+      if(el){el.textContent=cfg.email;el.href='mailto:'+cfg.email;}
+    }
+    if(cfg.tel){
+      const el=document.getElementById('footerTel');
+      if(el){el.textContent=cfg.tel;el.href='tel:'+cfg.tel.replace(/\D/g,'');}
+    }
+    if(cfg.end){const el=document.getElementById('footerEnd');if(el)el.textContent=cfg.end;}
   }catch(e){}
 }
 loadSiteConfig();

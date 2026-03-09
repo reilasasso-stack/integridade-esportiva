@@ -4,9 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel Admin | Integridade Esportiva</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--n:#0D1B2A;--n2:#132337;--n3:#1a2f45;--n4:#0a1520;--g:#2D6A4F;--gl:#40916C;--ga:#74C69D;--r:#e74c3c;--y:#f0a500;--b:#3b82f6;--p:#8b5cf6;--tx:rgba(255,255,255,0.85);--mu:rgba(255,255,255,0.45);--bd:rgba(255,255,255,0.07);}
+:root{
+  /* Cores base — mesmo padrão do index.html e termos.html */
+  --navy:#0D1B2A; --n:#0D1B2A;
+  --navy2:#132337; --n2:#132337;
+  --n3:#1a2f45;--n4:#0a1520;
+  --green:#2D6A4F; --g:#2D6A4F;
+  --gl:#40916C;
+  --ga:#74C69D;
+  --sand:#F5ECD7;
+  --white:#FAFAF8;
+  --muted:#5a6a7a;
+  /* Extras do dashboard */
+  --r:#e74c3c;--y:#f0a500;--b:#3b82f6;--p:#8b5cf6;
+  --tx:rgba(255,255,255,0.85);--mu:rgba(255,255,255,0.45);--bd:rgba(255,255,255,0.07);
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'DM Sans',sans-serif;background:var(--n4);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;}
 /* LOGIN */
@@ -151,13 +166,28 @@ tr:hover td{background:rgba(255,255,255,.02);}
 <!-- LOGIN -->
 <div id="loginWrap">
   <div class="lcard">
-    <div class="ico">🔒</div>
+    <div class="ico" aria-hidden="true">🔒</div>
     <h2>Painel Administrativo</h2>
     <p>Integridade Esportiva · USP<br>Área restrita para administradores</p>
-    <input class="inp" type="text" id="lu" placeholder="Usuário" autocomplete="off">
-    <input class="inp" type="password" id="lp" placeholder="Senha" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn-l" onclick="doLogin()">Entrar no painel</button>
-    <div class="lerr" id="lerr">Credenciais incorretas.</div>
+    <!-- Formulário de login com labels semânticos -->
+    <div id="loginForm">
+      <label for="lu" style="display:block;text-align:left;color:var(--mu);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Usuário</label>
+      <input class="inp" type="text" id="lu" placeholder="Usuário" autocomplete="username">
+      <label for="lp" style="display:block;text-align:left;color:var(--mu);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Senha</label>
+      <input class="inp" type="password" id="lp" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="btn-l" id="btnLogin" onclick="doLogin()">Entrar no painel</button>
+      <div class="lerr" id="lerr" role="alert" aria-live="polite">Usuário ou senha incorretos.</div>
+    </div>
+    <!-- Setup de senha no primeiro acesso (sem credenciais no código-fonte) -->
+    <div id="setupForm" style="display:none;text-align:left">
+      <p style="color:var(--ga);font-size:.85rem;margin-bottom:1rem;text-align:center">⚙️ Primeiro acesso — configure a senha do painel</p>
+      <label for="np1" style="display:block;color:var(--mu);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Nova senha (mín. 8 caracteres)</label>
+      <input class="inp" type="password" id="np1" placeholder="Nova senha" autocomplete="new-password">
+      <label for="np2" style="display:block;color:var(--mu);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Confirmar senha</label>
+      <input class="inp" type="password" id="np2" placeholder="Confirmar senha" autocomplete="new-password" onkeydown="if(event.key==='Enter')setupPassword()">
+      <button class="btn-l" onclick="setupPassword()">Configurar e entrar</button>
+      <div class="lerr" id="setupErr" role="alert" aria-live="polite"></div>
+    </div>
   </div>
 </div>
 
@@ -416,7 +446,52 @@ tr:hover td{background:rgba(255,255,255,.02);}
 <script>
 const SHEET='https://script.google.com/macros/s/AKfycbzrSOeOCGwtagi-7Ofk5zQv04e2j6VgKaq-TYKT5gc4oh6CBSu7Gqch-LSXrZDOIvKN/exec';
 const CLAUDE='https://api.anthropic.com/v1/messages';
-const ADM_U='admin', ADM_P='integridade2024'; // ← Mude a senha aqui
+// Autenticação: sem credenciais em texto puro no código.
+// A senha é armazenada como hash SHA-256 no localStorage.
+// No primeiro acesso, o admin configura a própria senha pelo formulário.
+const ADM_U='admin';
+
+// Funções de segurança
+function escapeHtml(str){
+  return String(str==null?'':str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+function sanitizeHtml(html){
+  try{
+    const doc=new DOMParser().parseFromString(String(html||''),'text/html');
+    ['script','iframe','object','embed','form','link','meta','base'].forEach(tag=>
+      doc.querySelectorAll(tag).forEach(el=>el.remove())
+    );
+    doc.querySelectorAll('*').forEach(el=>{
+      [...el.attributes].forEach(attr=>{
+        const n=attr.name.toLowerCase();
+        if(n.startsWith('on')||(n==='href'&&/^javascript:/i.test(attr.value))||(n==='src'&&/^javascript:/i.test(attr.value))){
+          el.removeAttribute(attr.name);
+        }
+      });
+    });
+    return doc.body.innerHTML;
+  }catch(e){return escapeHtml(html);}
+}
+
+// Hash SHA-256 para senhas
+async function hashStr(str){
+  const enc=new TextEncoder().encode(str);
+  const buf=await crypto.subtle.digest('SHA-256',enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// Verificar se é primeiro acesso (sem senha configurada)
+(function checkFirstAccess(){
+  if(!localStorage.getItem('adm_hash')){
+    document.getElementById('loginForm').style.display='none';
+    document.getElementById('setupForm').style.display='block';
+  }
+})();
 
 let users=[], arts=JSON.parse(localStorage.getItem('ie_arts')||'[]');
 let nots={pend:[],aprov:[],publ:[]};
@@ -434,15 +509,46 @@ function defaultCart(){return[
   {id:8,titulo:'Compromisso com a integridade',txt:'Ao assinar, você declara conhecer as regras de integridade e compromete-se a reportar situações suspeitas.'},
 ];}
 
-// AUTH
-function doLogin(){
-  const u=document.getElementById('lu').value, p=document.getElementById('lp').value;
-  if(u===ADM_U&&p===ADM_P){
+// AUTH — senha armazenada como hash SHA-256, nunca em texto puro
+async function setupPassword(){
+  const p1=document.getElementById('np1').value;
+  const p2=document.getElementById('np2').value;
+  const errEl=document.getElementById('setupErr');
+  if(p1.length<8){errEl.textContent='A senha deve ter ao menos 8 caracteres.';errEl.style.display='block';return;}
+  if(p1!==p2){errEl.textContent='As senhas não coincidem.';errEl.style.display='block';return;}
+  localStorage.setItem('adm_hash',await hashStr(p1));
+  // Mostrar login normal após configurar
+  document.getElementById('setupForm').style.display='none';
+  document.getElementById('loginForm').style.display='block';
+  notif('✅ Senha configurada! Faça login.');
+}
+
+let loginAttempts=0,loginBlocked=false;
+async function doLogin(){
+  if(loginBlocked){notif('Aguarde antes de tentar novamente.',true);return;}
+  const u=document.getElementById('lu').value.trim();
+  const p=document.getElementById('lp').value;
+  if(!u||!p)return;
+  const storedHash=localStorage.getItem('adm_hash');
+  if(!storedHash){notif('Configure a senha primeiro.',true);return;}
+  const inputHash=await hashStr(p);
+  if(u===ADM_U&&inputHash===storedHash){
+    loginAttempts=0;
+    document.getElementById('lerr').style.display='none';
     document.getElementById('loginWrap').style.display='none';
     document.getElementById('app').style.display='flex';
     addLog('Login','admin','Acesso ao painel');
     loadData(); renderCart(); renderArts(); renderLogs();
-  } else { document.getElementById('lerr').style.display='block'; }
+  } else {
+    loginAttempts++;
+    document.getElementById('lerr').style.display='block';
+    if(loginAttempts>=5){
+      loginBlocked=true;
+      document.getElementById('btnLogin').disabled=true;
+      document.getElementById('lerr').textContent='Muitas tentativas. Aguarde 30 segundos.';
+      setTimeout(()=>{loginBlocked=false;loginAttempts=0;document.getElementById('btnLogin').disabled=false;document.getElementById('lerr').textContent='Usuário ou senha incorretos.';},30000);
+    }
+  }
 }
 function doLogout(){addLog('Logout','admin','');document.getElementById('loginWrap').style.display='flex';document.getElementById('app').style.display='none';}
 
@@ -471,14 +577,22 @@ function updateOv(){
   document.getElementById('ovHoje').textContent=users.filter(r=>new Date(r[5]).toDateString()===hoje).length;
   const am={};users.forEach(r=>{const a=r[4]||'?';am[a]=(am[a]||0)+1;});
   const s=Object.entries(am).sort((a,b)=>b[1]-a[1]),mx=s[0]?.[1]||1;
-  document.getElementById('ovAreas').innerHTML=s.slice(0,6).map(([a,c])=>`<div class="pw"><div class="pl"><span>${a}</span><span>${c}</span></div><div class="pb"><div class="pf" style="width:${(c/mx*100).toFixed(0)}%"></div></div></div>`).join('')||'<div style="color:var(--mu)">Sem dados</div>';
+  document.getElementById('ovAreas').innerHTML=s.slice(0,6).map(([a,c])=>`<div class="pw"><div class="pl"><span>${escapeHtml(a)}</span><span>${escapeHtml(String(c))}</span></div><div class="pb"><div class="pf" style="width:${(c/mx*100).toFixed(0)}%"></div></div></div>`).join('')||'<div style="color:var(--mu)">Sem dados</div>';
   const rec=[...users].reverse().slice(0,5);
-  document.getElementById('ovRec').innerHTML=rec.length?rec.map(r=>`<tr><td style="font-weight:500">${r[0]||'—'}</td><td><span class="bdg bg">${r[4]||'—'}</span></td><td style="color:var(--mu);font-size:.78rem">${r[5]?new Date(r[5]).toLocaleDateString('pt-BR'):'—'}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">Nenhuma ainda</td></tr>';
+  document.getElementById('ovRec').innerHTML=rec.length?rec.map(r=>{
+    let dataFmt='—';
+    if(r[5]){try{dataFmt=new Date(r[5]).toLocaleDateString('pt-BR');}catch(e){}}
+    return `<tr><td style="font-weight:500">${escapeHtml(r[0]||'—')}</td><td><span class="bdg bg">${escapeHtml(r[4]||'—')}</span></td><td style="color:var(--mu);font-size:.78rem">${escapeHtml(dataFmt)}</td></tr>`;
+  }).join(''):'<tr><td colspan="3" class="empty">Nenhuma ainda</td></tr>';
 }
 
-// USERS
+// USERS — escapeHtml em todos os campos vindos da planilha
 function renderUsers(d){
-  document.getElementById('uTable').innerHTML=d.length?d.map((r,i)=>`<tr><td style="color:var(--mu)">${d.length-i}</td><td style="font-weight:500">${r[0]||'—'}</td><td style="color:var(--mu)">${r[1]||'—'}</td><td><span class="bdg bg">${r[4]||'—'}</span></td><td style="color:var(--mu)">${r[3]||'—'}</td><td style="color:var(--mu);font-size:.78rem">${r[5]?new Date(r[5]).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}):'—'}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">Nenhum usuário.</td></tr>';
+  document.getElementById('uTable').innerHTML=d.length?d.map((r,i)=>{
+    let dataFmt='—';
+    if(r[5]){try{dataFmt=new Date(r[5]).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){}}
+    return `<tr><td style="color:var(--mu)">${d.length-i}</td><td style="font-weight:500">${escapeHtml(r[0]||'—')}</td><td style="color:var(--mu)">${escapeHtml(r[1]||'—')}</td><td><span class="bdg bg">${escapeHtml(r[4]||'—')}</span></td><td style="color:var(--mu)">${escapeHtml(r[3]||'—')}</td><td style="color:var(--mu);font-size:.78rem">${escapeHtml(dataFmt)}</td></tr>`;
+  }).join(''):'<tr><td colspan="6" class="empty">Nenhum usuário.</td></tr>';
 }
 function filterU(){
   const q=document.getElementById('uQ').value.toLowerCase(),f=document.getElementById('uF').value;
@@ -522,7 +636,8 @@ async function gerarNots(){
 }
 
 function renderNots(){
-  const mk=(arr,tipo)=>arr.length?arr.map(n=>`<div class="nitem"><div class="ntag">${n.categoria} · ${n.origem}</div><div class="ntitle">${n.titulo}</div><div class="nsum">${n.resumo}</div><div class="nfoot"><span style="color:var(--mu);font-size:.75rem">${n.data}</span><div class="bgrp">${tipo==='pend'?`<button class="br2" onclick="rejN(${n.id})">✕</button><button class="bs" onclick="aprovN(${n.id})">✓ Aprovar</button>`:tipo==='aprov'?`<button class="bs" onclick="publN(${n.id})">🌐 Publicar</button>`:`<span class="bdg bb">Publicada</span>`}</div></div></div>`).join(''):`<div class="empty" style="grid-column:1/-1">Nenhuma aqui.</div>`;
+  // Escapar todos os campos de notícias antes de inserir no DOM
+  const mk=(arr,tipo)=>arr.length?arr.map(n=>`<div class="nitem"><div class="ntag">${escapeHtml(n.categoria)} · ${escapeHtml(n.origem)}</div><div class="ntitle">${escapeHtml(n.titulo)}</div><div class="nsum">${escapeHtml(n.resumo)}</div><div class="nfoot"><span style="color:var(--mu);font-size:.75rem">${escapeHtml(n.data)}</span><div class="bgrp">${tipo==='pend'?`<button class="br2" onclick="rejN(${Number(n.id)})">✕</button><button class="bs" onclick="aprovN(${Number(n.id)})">✓ Aprovar</button>`:tipo==='aprov'?`<button class="bs" onclick="publN(${Number(n.id)})">🌐 Publicar</button>`:`<span class="bdg bb">Publicada</span>`}</div></div></div>`).join(''):`<div class="empty" style="grid-column:1/-1">Nenhuma aqui.</div>`;
   document.getElementById('gPend').innerHTML=mk(nots.pend,'pend');
   document.getElementById('gAprov').innerHTML=mk(nots.aprov,'aprov');
   document.getElementById('gPubl').innerHTML=mk(nots.publ,'publ');
@@ -557,7 +672,8 @@ async function artIA(){
     document.getElementById('aE').innerHTML=d.content?.[0]?.text||'';
     notif('✅ Conteúdo gerado com IA!');
   }catch(e){
-    document.getElementById('aE').innerHTML=`<h2>Introdução</h2><p>${t} é um tema essencial para a integridade esportiva no Brasil.</p><h2>Desenvolvimento</h2><p>Escreva aqui o conteúdo sobre ${t}...</p><h2>Conclusão</h2><p>A conscientização sobre ${t} contribui para um esporte mais ético e transparente.</p>`;
+    const et=escapeHtml(t);
+    document.getElementById('aE').innerHTML=`<h2>Introdução</h2><p>${et} é um tema essencial para a integridade esportiva no Brasil.</p><h2>Desenvolvimento</h2><p>Escreva aqui o conteúdo sobre ${et}...</p><h2>Conclusão</h2><p>A conscientização sobre ${et} contribui para um esporte mais ético e transparente.</p>`;
     notif('Esboço criado! Configure a API para geração automática completa.');
   }
 }
@@ -572,13 +688,31 @@ function saveArt(){
 }
 function clearArt(){['aT','aA','aF','aR'].forEach(id=>document.getElementById(id).value='');document.getElementById('aE').innerHTML='';}
 function renderArts(){
-  document.getElementById('artList').innerHTML=arts.length?arts.map(a=>`<div style="border:1px solid var(--bd);border-radius:8px;padding:.9rem;margin-bottom:.6rem"><div style="display:flex;justify-content:space-between;gap:.5rem;margin-bottom:.3rem"><span style="font-size:.88rem;font-weight:500;line-height:1.4">${a.titulo}</span><button class="br2" onclick="delArt(${a.id})">✕</button></div><div style="color:var(--mu);font-size:.75rem">${a.autor} · ${a.data}</div><div style="margin-top:.4rem"><span class="bdg bg">${a.cat}</span></div></div>`).join(''):'<div class="empty">Nenhum artigo.</div>';
+  // Usar escapeHtml em todos os campos de artigos
+  document.getElementById('artList').innerHTML=arts.length?arts.map(a=>`<div style="border:1px solid var(--bd);border-radius:8px;padding:.9rem;margin-bottom:.6rem"><div style="display:flex;justify-content:space-between;gap:.5rem;margin-bottom:.3rem"><span style="font-size:.88rem;font-weight:500;line-height:1.4">${escapeHtml(a.titulo)}</span><button class="br2" onclick="delArt(${Number(a.id)})">✕</button></div><div style="color:var(--mu);font-size:.75rem">${escapeHtml(a.autor)} · ${escapeHtml(a.data)}</div><div style="margin-top:.4rem"><span class="bdg bg">${escapeHtml(a.cat)}</span></div></div>`).join(''):'<div class="empty">Nenhum artigo.</div>';
 }
 function delArt(id){arts=arts.filter(a=>a.id!==id);localStorage.setItem('ie_arts',JSON.stringify(arts));renderArts();notif('Artigo removido.');}
 
-// CARTILHA
+// CARTILHA — usar DOM para setar valores de forma segura
 function renderCart(){
-  document.getElementById('cartEd').innerHTML=cart.map(s=>`<div class="csb"><div class="csh"><span class="csn">0${s.id}</span></div><div class="fg" style="margin-bottom:.75rem"><label>Título da seção</label><input type="text" value="${s.titulo}" id="ct${s.id}" style="background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:6px;color:white;padding:.6rem .9rem;font-size:.88rem;font-family:'DM Sans',sans-serif;width:100%"></div><label style="color:var(--mu);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.35rem">Conteúdo</label><div style="background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:6px;padding:.75rem;min-height:80px;outline:none;color:var(--tx);font-size:.85rem;line-height:1.6" contenteditable="true" id="cb${s.id}">${s.txt}</div></div>`).join('');
+  const ed=document.getElementById('cartEd');
+  ed.innerHTML='';
+  cart.forEach(s=>{
+    const div=document.createElement('div');div.className='csb';
+    div.innerHTML=`<div class="csh"><span class="csn">0${Number(s.id)}</span></div>
+      <div class="fg" style="margin-bottom:.75rem">
+        <label for="ct${Number(s.id)}" style="color:var(--mu);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.35rem">Título da seção</label>
+        <input type="text" id="ct${Number(s.id)}" style="background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:6px;color:white;padding:.6rem .9rem;font-size:.88rem;font-family:'DM Sans',sans-serif;width:100%">
+      </div>
+      <label for="cb${Number(s.id)}" style="color:var(--mu);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.35rem">Conteúdo</label>
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:6px;padding:.75rem;min-height:80px;outline:none;color:var(--tx);font-size:.85rem;line-height:1.6" contenteditable="true" id="cb${Number(s.id)}"></div>`;
+    // Usar .value e .innerHTML apenas após criação DOM, para evitar XSS via template literal
+    const inp=div.querySelector('#ct'+Number(s.id));
+    if(inp)inp.value=String(s.titulo||'');
+    const box=div.querySelector('#cb'+Number(s.id));
+    if(box)box.innerHTML=sanitizeHtml(String(s.txt||''));
+    ed.appendChild(div);
+  });
 }
 function saveCart(){
   cart.forEach(s=>{const t=document.getElementById('ct'+s.id),b=document.getElementById('cb'+s.id);if(t)s.titulo=t.value;if(b)s.txt=b.innerHTML;});
@@ -595,16 +729,24 @@ function saveTer(){localStorage.setItem('ie_termos',document.getElementById('tE'
 function savePriv(){localStorage.setItem('ie_priv',document.getElementById('pE').innerHTML);notif('✅ Privacidade salva!');addLog('Privacidade salva','admin','');}
 function salvarTudo(){saveCart();saveSite();saveTer();savePriv();notif('✅ Tudo salvo!');}
 
-// LOGS
-function addLog(a,u,d){logs.unshift({ts:new Date().toLocaleString('pt-BR'),a,u,d});if(logs.length>100)logs.pop();localStorage.setItem('ie_logs',JSON.stringify(logs));renderLogs();}
-function renderLogs(){document.getElementById('logsTb').innerHTML=logs.length?logs.slice(0,50).map(l=>`<tr><td style="color:var(--mu);font-size:.78rem;white-space:nowrap">${l.ts}</td><td><span class="bdg bb">${l.a}</span></td><td style="color:var(--mu)">${l.u}</td><td style="color:var(--mu);font-size:.82rem">${l.d||'—'}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">Sem atividades.</td></tr>';}
+// LOGS — escapeHtml em todos os campos de log
+function addLog(a,u,d){
+  logs.unshift({ts:new Date().toLocaleString('pt-BR'),a:String(a||''),u:String(u||''),d:String(d||'')});
+  if(logs.length>100)logs.pop();
+  localStorage.setItem('ie_logs',JSON.stringify(logs));
+  renderLogs();
+}
+function renderLogs(){
+  document.getElementById('logsTb').innerHTML=logs.length?logs.slice(0,50).map(l=>`<tr><td style="color:var(--mu);font-size:.78rem;white-space:nowrap">${escapeHtml(l.ts)}</td><td><span class="bdg bb">${escapeHtml(l.a)}</span></td><td style="color:var(--mu)">${escapeHtml(l.u)}</td><td style="color:var(--mu);font-size:.82rem">${escapeHtml(l.d||'—')}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">Sem atividades.</td></tr>';
+}
 
 // NOTIF
 function notif(msg,err=false){const n=document.getElementById('notif');n.textContent=msg;n.className='notif on'+(err?' err':'');setTimeout(()=>n.className='notif',3500);}
 
-// INIT
-const sv=localStorage.getItem('ie_termos');if(sv)document.getElementById('tE').innerHTML=sv;
-const sp=localStorage.getItem('ie_priv');if(sp)document.getElementById('pE').innerHTML=sp;
+// INIT — sanitizar conteúdo do admin antes de renderizar no editor
+const sv=localStorage.getItem('ie_termos');if(sv)document.getElementById('tE').innerHTML=sanitizeHtml(sv);
+const sp=localStorage.getItem('ie_priv');if(sp)document.getElementById('pE').innerHTML=sanitizeHtml(sp);
+// Atualizar copyright com ano dinâmico
 setInterval(()=>{if(document.getElementById('app').style.display!=='none')loadData();},60000);
 </script>
 </body>
